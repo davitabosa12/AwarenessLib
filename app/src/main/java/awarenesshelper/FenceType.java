@@ -3,10 +3,15 @@ package awarenesshelper;
 public enum FenceType {
 
 
-	DETECTED_ACTIVITY,
+	DETECTED_ACTIVITY("DetectedActivity"),
 
-	HEADPHONE,
+	HEADPHONE("Headphone"),
 
-	LOCATION
+	LOCATION("Location");
+
+	private String value;
+	FenceType(String valueOf){
+	    this.value = valueOf;
+    }
 
 }

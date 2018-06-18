@@ -13,13 +13,18 @@ import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.FenceClient;
 import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
+import com.google.android.gms.awareness.state.HeadphoneState;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-
-import br.ufc.great.awarenesslib.MyCustomAction;
 
 public class Configurator {
 
@@ -32,17 +37,149 @@ public class Configurator {
         this.context = context;
         fenceClient = Awareness.getFenceClient(context);
         fences = new ArrayList<Fence>();
-        readJSON();
+        try {
+            readJSON();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    private void readJSON() {
+    private void readJSON() throws IOException {
+        Gson g = new Gson();
+        Reader r = new FileReader(new File("res/configuration.json"));
+        JsonReader jsonReader = g.newJsonReader(r); //fazer um novo reader de json
+
+        jsonReader.beginObject(); //espera um inicio de objeto
+        if(jsonReader.peek().name().equals("activities")){
+            jsonReader.nextName();
+            ArrayList<AwarenessActivity> activities = parseActivitiesList(jsonReader);
+        }
+
         Log.d("AwarenessHelper", "JSON lido..");
-        Fence headphoneFence = new Fence("headphoneFence",FenceType.HEADPHONE, new MyCustomAction());
-        fences.add(headphoneFence);
+
+
+
+
+        /*Fence headphoneFence = new Fence("headphoneFence",FenceType.HEADPHONE, new MyCustomAction());
+        fences.add(headphoneFence);*/
     }
 
-	public static Configurator init(Context context) {
+    private ArrayList<AwarenessActivity> parseActivitiesList(JsonReader jsonReader) throws IOException {
+        ArrayList<AwarenessActivity> activitiesList = new ArrayList<AwarenessActivity>();
+        jsonReader.beginArray();
+        while (jsonReader.hasNext()){
+            activitiesList.add(parseActivity(jsonReader));
+        }
+        jsonReader.endArray();
+        return activitiesList;
+    }
+
+
+    private AwarenessActivity parseActivity(JsonReader jsonReader) throws IOException {
+        jsonReader.beginObject();
+            jsonReader.nextName(); // "name" tag
+            String activityName = jsonReader.nextString();
+            jsonReader.nextName(); // "fences" tag
+            ArrayList<Fence> fence = parseFenceList(jsonReader);
+        jsonReader.endObject();
+        return new AwarenessActivity(activityName,fence);
+    }
+
+    private ArrayList<Fence> parseFenceList(JsonReader jsonReader) throws IOException {
+        ArrayList<Fence> fencesList = new ArrayList<Fence>();
+        jsonReader.beginArray(); //inicio "fences" array
+            while(jsonReader.hasNext()){
+                fencesList.add(parseFence(jsonReader));
+            }
+        jsonReader.endArray();
+        return fencesList;
+
+
+    }
+
+    private Fence parseFence(JsonReader jsonReader) throws IOException {
+        String fenceName, fenceAction, fenceMethod;
+        FenceType fenceType = null;
+        FenceParameter params;
+        jsonReader.beginObject(); //inicio objeto fence
+            while(jsonReader.hasNext()){
+                String tag = jsonReader.nextName();
+                switch(tag){
+                    case "fenceName":
+                        fenceName = jsonReader.nextString();
+                        break;
+                    case "fenceAction":
+                        fenceAction = jsonReader.nextString();
+                        break;
+                    case "fenceMethod":
+                        fenceMethod = jsonReader.nextString();
+                        break;
+                    case "fenceType":
+                        String type = jsonReader.nextString();
+                        try{
+                            fenceType = FenceType.valueOf(type);
+                        } catch (IllegalArgumentException e){
+                            Log.e("AwarenessLib", "FenceType not supported: " + type);
+                            e.printStackTrace();
+                        }
+                        break;
+                    case "params":
+                        switch(fenceType){
+                            case DETECTED_ACTIVITY:
+                                params = parseDetectedActivityParams(jsonReader);
+                                break;
+                            case LOCATION:
+                                params = parseLocationParams(jsonReader);
+                                break;
+                            case HEADPHONE:
+                                params = parseHeadphoneParams(jsonReader);
+                                break;
+                            default:
+                                Log.e("AwarenessLib","Fence type unknown.");
+                                break;
+                        }
+
+                        break;
+                    default:
+                        Log.w("AwarenessLib","Unknown tag while reading fence object: " + tag);
+                        break;
+                }
+
+            }
+        jsonReader.endObject();
+
+    }
+
+    private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) {
+        throw new UnsupportedOperationException("Under renovations.");
+    }
+
+    private FenceParameter parseLocationParams(JsonReader jsonReader) {
+        throw new UnsupportedOperationException("Under renovations.");
+    }
+
+    private HeadphoneFenceParameter parseHeadphoneParams(JsonReader jsonReader) throws IOException {
+        HeadphoneFenceParameter params = new HeadphoneFenceParameter();
+        jsonReader.beginObject();
+        while(jsonReader.hasNext()){
+            String tag = jsonReader.nextName();
+            switch(tag){
+                case "headphoneState":
+                    int state = jsonReader.nextInt();
+                    params.setHeadphoneState(state);
+                    break;
+                default:
+                    Log.w("AwarenessLib", "Unknown tag while reading Headphone Fence parameters: " + tag);
+                    break;
+            }
+        }
+        jsonReader.endObject();
+
+        return params;
+    }
+
+    public static Configurator init(Context context) {
         if(instance == null){
             instance = new Configurator(context);
 
@@ -59,6 +196,8 @@ public class Configurator {
             registerFence(f);
 		return instance;
 	}
+
+
 
     private static void registerFence(Fence fence) {
         final FenceAction theFenceAction = fence.getAction();
