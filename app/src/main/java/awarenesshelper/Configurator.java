@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.FenceClient;
+import com.google.android.gms.awareness.fence.AwarenessFence;
 import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.state.HeadphoneState;
@@ -23,6 +24,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +67,7 @@ public class Configurator {
         /*Fence headphoneFence = new Fence("headphoneFence",FenceType.HEADPHONE, new MyCustomAction());
         fences.add(headphoneFence);*/
     }
-
+    //TODO: Criar parser externo
     private ArrayList<AwarenessActivity> parseActivitiesList(JsonReader jsonReader) throws IOException {
         ArrayList<AwarenessActivity> activitiesList = new ArrayList<AwarenessActivity>();
         jsonReader.beginArray();
@@ -90,7 +93,11 @@ public class Configurator {
         ArrayList<Fence> fencesList = new ArrayList<Fence>();
         jsonReader.beginArray(); //inicio "fences" array
             while(jsonReader.hasNext()){
-                fencesList.add(parseFence(jsonReader));
+                try {
+                    fencesList.add(parseFence(jsonReader));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         jsonReader.endArray();
         return fencesList;
@@ -98,10 +105,12 @@ public class Configurator {
 
     }
 
-    private Fence parseFence(JsonReader jsonReader) throws IOException {
-        String fenceName, fenceAction, fenceMethod;
+    private Fence parseFence(JsonReader jsonReader) throws IOException, ClassNotFoundException{
+        String fenceName = null, fenceAction = null;
         FenceType fenceType = null;
-        FenceParameter params;
+        FenceParameter params = null;
+        FenceMethod fenceMethod = null;
+        FenceAction action = null;
         jsonReader.beginObject(); //inicio objeto fence
             while(jsonReader.hasNext()){
                 String tag = jsonReader.nextName();
@@ -110,10 +119,24 @@ public class Configurator {
                         fenceName = jsonReader.nextString();
                         break;
                     case "fenceAction":
+
                         fenceAction = jsonReader.nextString();
+                        Class<?> theAction = Class.forName(fenceAction);
+
+                        try {
+                            Constructor<?> constructor = theAction.getConstructor();
+                            Object obj = constructor.newInstance();
+                            if(obj instanceof FenceAction)
+                                action = (FenceAction) theAction.cast(obj);
+                            else
+                                Log.e("AwarenessLib", "Cast obj is not of the same type. theAction: "
+                                        + theAction.getSimpleName() + " obj: " + obj.getClass().getSimpleName());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         break;
                     case "fenceMethod":
-                        fenceMethod = jsonReader.nextString();
+                        fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
                         break;
                     case "fenceType":
                         String type = jsonReader.nextString();
@@ -148,14 +171,10 @@ public class Configurator {
 
             }
         jsonReader.endObject();
-
+        return new Fence(fenceName,fenceType,action,fenceMethod,params);
     }
 
     private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) {
-        throw new UnsupportedOperationException("Under renovations.");
-    }
-
-    private FenceParameter parseLocationParams(JsonReader jsonReader) {
         throw new UnsupportedOperationException("Under renovations.");
     }
 
@@ -171,6 +190,35 @@ public class Configurator {
                     break;
                 default:
                     Log.w("AwarenessLib", "Unknown tag while reading Headphone Fence parameters: " + tag);
+                    break;
+            }
+        }
+        jsonReader.endObject();
+
+        return params;
+    }
+    private LocationFenceParameter parseLocationParams(JsonReader jsonReader) throws IOException {
+        LocationFenceParameter params = new LocationFenceParameter();
+        double latitude,longitude,radius;
+        long dwellTimeMillis;
+        jsonReader.beginObject(); //
+        while(jsonReader.hasNext()){
+            String tag = jsonReader.nextName();
+            switch(tag){
+                case "latitude":
+                    latitude = jsonReader.nextDouble();
+                    break;
+                case "longitude":
+                    longitude = jsonReader.nextDouble();
+                    break;
+                case "radius":
+                    radius = jsonReader.nextDouble();
+                    break;
+                case "dwellTimeMillis":
+                    dwellTimeMillis = jsonReader.nextLong();
+                    break;
+                default:
+                    Log.w("AwarenessLib","Unknown tag while reading Location Fence parameters: " + tag);
                     break;
             }
         }
@@ -212,6 +260,8 @@ public class Configurator {
         Intent i = new Intent(filter);
         PendingIntent pi = PendingIntent.getBroadcast(context,0,i,PendingIntent.FLAG_CANCEL_CURRENT);
         context.registerReceiver(myReceiver,new IntentFilter(filter));
+
+        AwarenessFence myFence= fence.getMethod();
 
         Awareness.getFenceClient(context).updateFences(new FenceUpdateRequest.Builder().addFence(fence.getName(),fence.getMethod(),pi).build())
         .addOnSuccessListener(new OnSuccessListener<Void>() {

@@ -8,6 +8,4 @@ public class ParameterParser {
     public ParameterParser(){
 
     }
-
-    public static HeadphoneFenceParameter parseHeadphoneFenceParameters
 }

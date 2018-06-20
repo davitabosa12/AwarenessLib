@@ -22,7 +22,7 @@
                     "fenceName": "DetectorDeAtividade",
                     "fenceAction": "ActivityDetectionAction",
                     "fenceType": "DetectedActivity",
-                    "fenceMethod": "ActivityDetection.DURING",
+                    "fenceMethod": "DetectedActivity.DURING",
                     "params":{
                         "activityTypes":[7]
                     }
