@@ -14,21 +14,6 @@
                 }
             ]
             
-        },
-        {
-            "name": "ActivityDetectionActivity",
-            "fences" : [
-                {
-                    "fenceName": "DetectorDeAtividade",
-                    "fenceAction": "ActivityDetectionAction",
-                    "fenceType": "DetectedActivity",
-                    "fenceMethod": "DetectedActivity.DURING",
-                    "params":{
-                        "activityTypes":[7]
-                    }
-                }
-            ]
-            
         }
     ]
 }

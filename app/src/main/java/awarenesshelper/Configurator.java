@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.FenceClient;
@@ -23,11 +24,15 @@ import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import br.ufc.great.awarenesslib.R;
 
 public class Configurator {
 
@@ -35,10 +40,14 @@ public class Configurator {
     private static List<Fence> fences;
     private static Context context;
     private static Configurator instance;
+    ArrayList<AwarenessActivity> activities;
 
     private Configurator(Context context){
         this.context = context;
         fenceClient = Awareness.getFenceClient(context);
+        String activityName = context.getClass().getSimpleName();
+
+        System.out.println(activityName);
         fences = new ArrayList<Fence>();
         try {
             readJSON();
@@ -50,16 +59,31 @@ public class Configurator {
 
     private void readJSON() throws IOException {
         Gson g = new Gson();
-        Reader r = new FileReader(new File("res/configuration.json"));
-        JsonReader jsonReader = g.newJsonReader(r); //fazer um novo reader de json
+        InputStream is = context.getResources().openRawResource(R.raw.configuration);
+        InputStreamReader reader = new InputStreamReader(is);
+        //Reader r = new FileReader(new File("res/configuration.json"));
+        JsonReader jsonReader = g.newJsonReader(reader); //fazer um novo reader de json
 
         jsonReader.beginObject(); //espera um inicio de objeto
-        if(jsonReader.peek().name().equals("activities")){
-            jsonReader.nextName();
-            ArrayList<AwarenessActivity> activities = parseActivitiesList(jsonReader);
+        //System.err.println(jsonReader);
+        if(jsonReader.nextName().equals("activities")){
+          //  jsonReader.nextName();
+            activities = parseActivitiesList(jsonReader);
+        }
+        if(activities == null){
+            Toast.makeText(context,"No activities",Toast.LENGTH_LONG).show();
+        }
+        else{
+            for(AwarenessActivity activity : activities){
+                for(Fence fence : activity.fences){
+                    Log.d("AwarenessLib","Registering fence: " + fence.getName());
+                    registerFence(fence);
+                }
+            }
         }
 
         Log.d("AwarenessHelper", "JSON lido..");
+
 
 
 
@@ -117,31 +141,29 @@ public class Configurator {
                 switch(tag){
                     case "fenceName":
                         fenceName = jsonReader.nextString();
+                        Log.d("AwarenessLib", "Action name: " + fenceName);
                         break;
                     case "fenceAction":
 
-                        fenceAction = jsonReader.nextString();
-                        Class<?> theAction = Class.forName(fenceAction);
-
                         try {
-                            Constructor<?> constructor = theAction.getConstructor();
-                            Object obj = constructor.newInstance();
-                            if(obj instanceof FenceAction)
-                                action = (FenceAction) theAction.cast(obj);
-                            else
-                                Log.e("AwarenessLib", "Cast obj is not of the same type. theAction: "
-                                        + theAction.getSimpleName() + " obj: " + obj.getClass().getSimpleName());
+                            String actionName = jsonReader.nextString();
+                            Log.d("AwarenessLib", "Action name: " + actionName);
+                            action = ((FenceAction) Class.forName(actionName).newInstance());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                         break;
                     case "fenceMethod":
-                        fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
+                        String theMethod = jsonReader.nextString();
+                        Log.d("AwarenessLib", "Method name: " + theMethod);
+                        fenceMethod = FenceMethod.valueFor(theMethod);
+
                         break;
                     case "fenceType":
                         String type = jsonReader.nextString();
+                        Log.d("AwarenessLib", "Type name: " + type);
                         try{
-                            fenceType = FenceType.valueOf(type);
+                            fenceType = FenceType.valueFor(type);
                         } catch (IllegalArgumentException e){
                             Log.e("AwarenessLib", "FenceType not supported: " + type);
                             e.printStackTrace();
