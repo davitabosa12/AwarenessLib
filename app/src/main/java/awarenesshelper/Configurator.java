@@ -2,6 +2,7 @@ package awarenesshelper;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,21 +41,37 @@ public class Configurator {
     private static List<Fence> fences;
     private static Context context;
     private static Configurator instance;
+    private String activityName;
     ArrayList<AwarenessActivity> activities;
 
-    private Configurator(Context context){
-        this.context = context;
-        fenceClient = Awareness.getFenceClient(context);
-        String activityName = context.getClass().getSimpleName();
+    private Configurator(Activity activity){
+        this.context = activity.getApplicationContext();
+        this.fenceClient = Awareness.getFenceClient(context);
+        this.activityName = activity.getClass().getName();
 
-        System.out.println(activityName);
-        fences = new ArrayList<Fence>();
+
+        Log.d("AwarenessLib",activityName);
+        fences = new ArrayList<>();
         try {
             readJSON();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private Configurator(Service service){
+        this.context = service.getApplicationContext();
+        this.fenceClient = Awareness.getFenceClient(context);
+        this.activityName = service.getClass().getName();
+        Log.d("AwarenessLib",activityName);
+
+        fences = new ArrayList<>();
+        try {
+            readJSON();
+        } catch (IOException e) {
+            Log.e("AwarenessLib", "Error reading JSON");
+            e.printStackTrace();
+        }
     }
 
     private void readJSON() throws IOException {
@@ -96,19 +113,34 @@ public class Configurator {
         ArrayList<AwarenessActivity> activitiesList = new ArrayList<AwarenessActivity>();
         jsonReader.beginArray();
         while (jsonReader.hasNext()){
-            activitiesList.add(parseActivity(jsonReader));
+            AwarenessActivity ac = parseActivity(jsonReader, activityName);
+            if(ac == null){
+
+                continue;
+            }
+
+            activitiesList.add(parseActivity(jsonReader,activityName));
         }
         jsonReader.endArray();
         return activitiesList;
     }
 
 
-    private AwarenessActivity parseActivity(JsonReader jsonReader) throws IOException {
+    private AwarenessActivity parseActivity(JsonReader jsonReader, String activity) throws IOException {
+        ArrayList<Fence> fence = null;
         jsonReader.beginObject();
             jsonReader.nextName(); // "name" tag
-            String activityName = jsonReader.nextString();
-            jsonReader.nextName(); // "fences" tag
-            ArrayList<Fence> fence = parseFenceList(jsonReader);
+            String jsonActivityName = jsonReader.nextString();
+            if(jsonActivityName.equals(activity)){
+                jsonReader.nextName(); // "fences" tag
+                Log.d("AwarenessLib", "Parsing fence list for " + jsonActivityName );
+                fence = parseFenceList(jsonReader);
+            }
+            else{
+                Log.d("AwarenessLib", "Ignoring activity with name: " + jsonActivityName );
+                jsonReader.skipValue();
+            }
+
         jsonReader.endObject();
         return new AwarenessActivity(activityName,fence);
     }
@@ -249,18 +281,16 @@ public class Configurator {
         return params;
     }
 
-    public static Configurator init(Context context) {
+    public static Configurator init(Service service){
         if(instance == null){
-            instance = new Configurator(context);
-
+            Log.d("AwarenessLib",service.getClass().getName());
+            instance = new Configurator(service);
         }
-
-        return instance;
-	}
-
+    }
     public static Configurator init(Activity activity){
 	    if(instance == null){
-	        instance = new Configurator(activity.getApplicationContext());
+	        Log.d("AwarenessLib",activity.getClass().getName());
+	        instance = new Configurator(activity);
         }
         for(Fence f : fences)
             registerFence(f);
