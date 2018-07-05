@@ -1,7 +1,7 @@
 {
     "activities":[  
         {
-            "name": "HeadphoneActivity",
+            "name": "br.ufc.great.awarenesslib.MainActivity",
             "fences" : [
                 {
                     "fenceName": "Headphone",
@@ -14,6 +14,21 @@
                 }
             ]
             
+        },
+        {
+            "name": "br.ufc.great.awarenesslib.ReconActivity",
+            "fences" : [
+                {
+                    "fenceName": "Nome Qualquer",
+                    "fenceAction": "br.ufc.great.awarenesslib.ComplexAction",
+                    "fenceType":  "DetectedActivity",
+                    "fenceMethod": "DetectedActivity.STARTING",
+                    "params": {
+                        "activityTypes" : [0,1,2,7,8]
+                    }
+                }
+            ]
+
         }
     ]
 }

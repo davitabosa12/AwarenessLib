@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class AwarenessActivity {
     private String name;
-    ArrayList<Fence> fences;
+    private ArrayList<Fence> fences;
 
     public AwarenessActivity(String name, ArrayList<Fence> fences){
         this.name = name;
@@ -17,4 +17,11 @@ public class AwarenessActivity {
     }
 
 
+    public String getName() {
+        return name;
+    }
+
+    public ArrayList<Fence> getFences() {
+        return fences;
+    }
 }

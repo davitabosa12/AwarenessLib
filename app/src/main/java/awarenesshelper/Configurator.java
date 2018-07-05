@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,21 +38,25 @@ import br.ufc.great.awarenesslib.R;
 
 public class Configurator {
 
-    private static FenceClient fenceClient;
-    private static List<Fence> fences;
+    private FenceClient fenceClient;
+    private static ArrayList<Fence> registredFences;
+    private Activity activity;
+    private Service service;
     private static Context context;
     private static Configurator instance;
-    private String activityName;
-    ArrayList<AwarenessActivity> activities;
+    private static String activityName;
+    private static ArrayList<AwarenessActivity> activities;
 
     private Configurator(Activity activity){
-        this.context = activity.getApplicationContext();
+        this.activity = activity;
+        registredFences = new ArrayList<>();
+        context = activity.getApplicationContext();
         this.fenceClient = Awareness.getFenceClient(context);
-        this.activityName = activity.getClass().getName();
+        activityName = activity.getClass().getName();
 
 
         Log.d("AwarenessLib",activityName);
-        fences = new ArrayList<>();
+
         try {
             readJSON();
         } catch (IOException e) {
@@ -60,12 +65,13 @@ public class Configurator {
     }
 
     private Configurator(Service service){
-        this.context = service.getApplicationContext();
+        this.service = service;
+        registredFences = new ArrayList<>();
+        context = service.getApplicationContext();
         this.fenceClient = Awareness.getFenceClient(context);
-        this.activityName = service.getClass().getName();
+        activityName = service.getClass().getName();
         Log.d("AwarenessLib",activityName);
 
-        fences = new ArrayList<>();
         try {
             readJSON();
         } catch (IOException e) {
@@ -74,86 +80,80 @@ public class Configurator {
         }
     }
 
+    /**
+     * Getter for the Activity which this Configurator is bound to
+     * @return null if it's bound by a service, otherwise the bound activity
+     *
+     */
+    public Activity getActivity() {
+        return activity;
+    }
+
+    /**
+     * Getter for the Service which this Configurator is bound to
+     * @return null if it's bound to an activity, otherwise the bound service
+     */
+    public Service getService() {
+        return service;
+    }
+
     private void readJSON() throws IOException {
         Gson g = new Gson();
         InputStream is = context.getResources().openRawResource(R.raw.configuration);
         InputStreamReader reader = new InputStreamReader(is);
-        //Reader r = new FileReader(new File("res/configuration.json"));
+
         JsonReader jsonReader = g.newJsonReader(reader); //fazer um novo reader de json
 
         jsonReader.beginObject(); //espera um inicio de objeto
-        //System.err.println(jsonReader);
+
         if(jsonReader.nextName().equals("activities")){
-          //  jsonReader.nextName();
             activities = parseActivitiesList(jsonReader);
         }
-        if(activities == null){
-            Toast.makeText(context,"No activities",Toast.LENGTH_LONG).show();
+        if(activities == null || activities.isEmpty()){
+            Log.d("AwarenessLib","No activities");
         }
-        else{
-            for(AwarenessActivity activity : activities){
-                for(Fence fence : activity.fences){
-                    Log.d("AwarenessLib","Registering fence: " + fence.getName());
-                    registerFence(fence);
-                }
-            }
-        }
-
-        Log.d("AwarenessHelper", "JSON lido..");
-
-
-
-
-
-        /*Fence headphoneFence = new Fence("headphoneFence",FenceType.HEADPHONE, new MyCustomAction());
-        fences.add(headphoneFence);*/
+        Log.d("AwarenessHelper", "JSON read..");
     }
     //TODO: Criar parser externo
     private ArrayList<AwarenessActivity> parseActivitiesList(JsonReader jsonReader) throws IOException {
-        ArrayList<AwarenessActivity> activitiesList = new ArrayList<AwarenessActivity>();
+        ArrayList<AwarenessActivity> activitiesList = new ArrayList<>();
         jsonReader.beginArray();
         while (jsonReader.hasNext()){
-            AwarenessActivity ac = parseActivity(jsonReader, activityName);
+            AwarenessActivity ac = parseActivity(jsonReader);
             if(ac == null){
 
                 continue;
             }
+            else{
+                activitiesList.add(ac);
+            }
 
-            activitiesList.add(parseActivity(jsonReader,activityName));
+
         }
         jsonReader.endArray();
         return activitiesList;
     }
 
 
-    private AwarenessActivity parseActivity(JsonReader jsonReader, String activity) throws IOException {
+    @Nullable
+    private AwarenessActivity parseActivity(JsonReader jsonReader) throws IOException {
         ArrayList<Fence> fence = null;
+        AwarenessActivity awarenessActivity = null;
         jsonReader.beginObject();
             jsonReader.nextName(); // "name" tag
             String jsonActivityName = jsonReader.nextString();
-            if(jsonActivityName.equals(activity)){
                 jsonReader.nextName(); // "fences" tag
-                Log.d("AwarenessLib", "Parsing fence list for " + jsonActivityName );
                 fence = parseFenceList(jsonReader);
-            }
-            else{
-                Log.d("AwarenessLib", "Ignoring activity with name: " + jsonActivityName );
-                jsonReader.skipValue();
-            }
-
+                awarenessActivity = new AwarenessActivity(jsonActivityName,fence);
         jsonReader.endObject();
-        return new AwarenessActivity(activityName,fence);
+        return awarenessActivity;
     }
 
     private ArrayList<Fence> parseFenceList(JsonReader jsonReader) throws IOException {
-        ArrayList<Fence> fencesList = new ArrayList<Fence>();
+        ArrayList<Fence> fencesList = new ArrayList<>();
         jsonReader.beginArray(); //inicio "fences" array
             while(jsonReader.hasNext()){
-                try {
-                    fencesList.add(parseFence(jsonReader));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+                fencesList.add(parseFence(jsonReader));
             }
         jsonReader.endArray();
         return fencesList;
@@ -161,7 +161,7 @@ public class Configurator {
 
     }
 
-    private Fence parseFence(JsonReader jsonReader) throws IOException, ClassNotFoundException{
+    private Fence parseFence(JsonReader jsonReader) throws IOException{
         String fenceName = null, fenceAction = null;
         FenceType fenceType = null;
         FenceParameter params = null;
@@ -228,8 +228,28 @@ public class Configurator {
         return new Fence(fenceName,fenceType,action,fenceMethod,params);
     }
 
-    private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) {
-        throw new UnsupportedOperationException("Under renovations.");
+    private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) throws IOException {
+        DetectedActivityFenceParameter params = new DetectedActivityFenceParameter();
+
+        jsonReader.beginObject();
+            while(jsonReader.hasNext()){
+                String tag = jsonReader.nextName();
+                switch(tag){
+                    case "activityTypes":{
+                        //activityTypes is an array with multiple activity detection types
+                        jsonReader.beginArray();
+                            while(jsonReader.hasNext()){
+                                int next = jsonReader.nextInt();
+                                Log.d("AwarenessLib", "DetectedActivity Read: " + next);
+                                params.addActivityType(next);
+                            }
+                            jsonReader.endArray();
+                    }
+                }
+            }
+            jsonReader.endObject();
+            return params;
+
     }
 
     private HeadphoneFenceParameter parseHeadphoneParams(JsonReader jsonReader) throws IOException {
@@ -286,20 +306,51 @@ public class Configurator {
             Log.d("AwarenessLib",service.getClass().getName());
             instance = new Configurator(service);
         }
+        else{
+            activityName = service.getClass().getName();
+        }
+
+        //unregister fences
+        for (Fence f: registredFences) {
+            unregisterFence(f);
+        }
+        for(AwarenessActivity a : activities){
+            if(a.getName().equals(activityName)){
+                ArrayList<Fence> fs = a.getFences();
+                for(Fence f : fs){
+                    registerFence(f);
+                }
+            }
+        }
+
+        return instance;
     }
     public static Configurator init(Activity activity){
 	    if(instance == null){
 	        Log.d("AwarenessLib",activity.getClass().getName());
 	        instance = new Configurator(activity);
         }
-        for(Fence f : fences)
-            registerFence(f);
+        else{
+            activityName = activity.getClass().getName();
+        }
+        //unregister fences
+        for (Fence f: registredFences) {
+            unregisterFence(f);
+        }
+        for(AwarenessActivity a : activities){
+            if(a.getName().equals(activityName)){
+                ArrayList<Fence> fs = a.getFences();
+                for(Fence f : fs){
+                    registerFence(f);
+                }
+            }
+        }
 		return instance;
 	}
 
 
 
-    private static void registerFence(Fence fence) {
+    private static void registerFence(final Fence fence) {
         final FenceAction theFenceAction = fence.getAction();
         BroadcastReceiver myReceiver = new BroadcastReceiver() {
             @Override
@@ -307,26 +358,44 @@ public class Configurator {
                 theFenceAction.doOperation(context, FenceState.extract(intent));
             }
         };
-        //TODO: Filtros de Intent devem ser gerados ou o usuario determina??
-        String filter = "SHOULD_BE_GENERATED";
+
+        String filter = fence.getName();
         Intent i = new Intent(filter);
         PendingIntent pi = PendingIntent.getBroadcast(context,0,i,PendingIntent.FLAG_CANCEL_CURRENT);
         context.registerReceiver(myReceiver,new IntentFilter(filter));
 
-        AwarenessFence myFence= fence.getMethod();
+        final String fenceName = fence.getName();
 
         Awareness.getFenceClient(context).updateFences(new FenceUpdateRequest.Builder().addFence(fence.getName(),fence.getMethod(),pi).build())
         .addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.d("AwarenessHelper", "Fence registration successful");
+                Log.d("AwarenessHelper", "Fence registration successful: "  + fenceName);
+                registredFences.add(fence);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.d("AwarenessHelper", "Fence registration failed: " + e.getMessage());
+                Log.d("AwarenessHelper", "Fence registration failed for " + fenceName + ": " + e.getMessage());
             }
         });
 	}
+
+	private static void unregisterFence(final Fence fence){
+        final String fenceName = fence.getName();
+        Awareness.getFenceClient(context).updateFences(new FenceUpdateRequest.Builder().removeFence(fence.getName()).build())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("AwarenessLib", "Fence removal successful: " + fenceName);
+                        registredFences.remove(fence);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("AwarenessLib", "Fence removal failed for "+ fenceName + ": " + e.getMessage());
+                }
+        });
+    }
 
 }
