@@ -5,7 +5,7 @@
             "fences" : [
                 {
                     "fenceName": "Headphone",
-                    "fenceAction": "br.ufc.great.awarenesslib.MyCustomAction",
+                    "fenceAction": "action1",
                     "fenceType":  "Headphone",
                     "fenceMethod": "Headphone.DURING",
                     "params": {
@@ -20,7 +20,7 @@
             "fences" : [
                 {
                     "fenceName": "Nome Qualquer",
-                    "fenceAction": "br.ufc.great.awarenesslib.ComplexAction",
+                    "fenceAction": "complex_action",
                     "fenceType":  "DetectedActivity",
                     "fenceMethod": "DetectedActivity.STARTING",
                     "params": {

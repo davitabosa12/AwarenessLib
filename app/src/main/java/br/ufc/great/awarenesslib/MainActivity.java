@@ -6,7 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import awarenesshelper.Configurator;
+import awarenesshelper.FenceAction;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,7 +20,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.intent_data);
-        Configurator.init(MainActivity.this);
+        Map<String, FenceAction> actions = new HashMap<>();
+        actions.put("action1", new MyCustomAction());
+        Configurator.init(MainActivity.this, actions);
 
         skip = findViewById(R.id.btn_recon);
 

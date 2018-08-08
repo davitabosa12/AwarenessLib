@@ -28,7 +28,7 @@ public class JSONParser {
         this.context = context;
     }
 
-    private List<AwarenessActivity> readJSON() throws IOException {
+    public List<AwarenessActivity> readJSON() throws IOException {
         Gson g = new Gson();
         List<AwarenessActivity> activities = null;
         Reader r = new FileReader(new File("res/configuration.json"));
@@ -102,19 +102,9 @@ public class JSONParser {
                 case "fenceAction":
 
                     fenceAction = jsonReader.nextString();
-                    Class<?> theAction = Class.forName(fenceAction);
-
-                    try {
-                        Constructor<?> constructor = theAction.getConstructor();
-                        Object obj = constructor.newInstance();
-                        if(obj instanceof FenceAction)
-                            action = (FenceAction) theAction.cast(obj);
-                        else
-                            Log.e("AwarenessLib", "Cast obj is not of the same type. theAction: "
-                                    + theAction.getSimpleName() + " obj: " + obj.getClass().getSimpleName());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    action = actions.get(fenceAction);
+                    if(action == null)
+                        Log.e("AwarenessLib", "Action " + fenceAction + " not found in Action Map. Did you spell it correctly?");
                     break;
                 case "fenceMethod":
                     fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
