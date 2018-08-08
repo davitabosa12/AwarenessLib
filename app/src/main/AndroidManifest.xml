@@ -30,7 +30,12 @@
             android:name="com.google.android.nearby.messages.API_KEY"
             android:value="AIzaSyD9ZhMu7JYzmqrb84CvSA9SNjcVXbWg7f4" />
 
-        <activity android:name=".ReconActivity"></activity>
+        <activity android:name=".ReconActivity" />
+
+        <service
+            android:name="awarenesshelper.SnapshotWatcherService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
