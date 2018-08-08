@@ -33,24 +33,26 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import br.ufc.great.awarenesslib.R;
 
 public class Configurator {
 
     private FenceClient fenceClient;
-    private static ArrayList<Fence> registredFences;
+
     private Activity activity;
     private Service service;
     private static Context context;
     private static Configurator instance;
     private static String activityName;
     private static ArrayList<AwarenessActivity> activities;
+    private static FenceManager fenceManager;
 
-    private Configurator(Activity activity){
+    private Configurator(Activity activity, Map<String, FenceAction> actions){
         this.activity = activity;
-        registredFences = new ArrayList<>();
         context = activity.getApplicationContext();
+        fenceManager = FenceManager.getInstance(context);
         this.fenceClient = Awareness.getFenceClient(context);
         activityName = activity.getClass().getName();
 
@@ -64,12 +66,13 @@ public class Configurator {
         }
     }
 
-    private Configurator(Service service){
+    private Configurator(Service service, Map<String, FenceAction> actions){
         this.service = service;
-        registredFences = new ArrayList<>();
         context = service.getApplicationContext();
+        fenceManager = FenceManager.getInstance(context);
         this.fenceClient = Awareness.getFenceClient(context);
         activityName = service.getClass().getName();
+        JSONParser parser = new JSONParser(context,actions);
         Log.d("AwarenessLib",activityName);
 
         try {
@@ -301,101 +304,48 @@ public class Configurator {
         return params;
     }
 
-    public static Configurator init(Service service){
+    public static Configurator init(Service service, Map<String, FenceAction> actions){
         if(instance == null){
             Log.d("AwarenessLib",service.getClass().getName());
-            instance = new Configurator(service);
+            instance = new Configurator(service, actions);
         }
         else{
             activityName = service.getClass().getName();
         }
 
         //unregister fences
-        for (Fence f: registredFences) {
-            unregisterFence(f);
-        }
+        fenceManager.unregisterAll();
         for(AwarenessActivity a : activities){
             if(a.getName().equals(activityName)){
                 ArrayList<Fence> fs = a.getFences();
                 for(Fence f : fs){
-                    registerFence(f);
+                    fenceManager.registerFence(f);
                 }
             }
         }
 
         return instance;
     }
-    public static Configurator init(Activity activity){
+    public static Configurator init(Activity activity, Map<String, FenceAction> actions){
 	    if(instance == null){
 	        Log.d("AwarenessLib",activity.getClass().getName());
-	        instance = new Configurator(activity);
+	        instance = new Configurator(activity, actions);
         }
         else{
             activityName = activity.getClass().getName();
         }
         //unregister fences
-        for (Fence f: registredFences) {
-            unregisterFence(f);
-        }
+        fenceManager.unregisterAll();
         for(AwarenessActivity a : activities){
             if(a.getName().equals(activityName)){
                 ArrayList<Fence> fs = a.getFences();
                 for(Fence f : fs){
-                    registerFence(f);
+                    fenceManager.registerFence(f);
                 }
             }
         }
 		return instance;
 	}
 
-
-
-    private static void registerFence(final Fence fence) {
-        final FenceAction theFenceAction = fence.getAction();
-        BroadcastReceiver myReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                theFenceAction.doOperation(context, FenceState.extract(intent));
-            }
-        };
-
-        String filter = fence.getName();
-        Intent i = new Intent(filter);
-        PendingIntent pi = PendingIntent.getBroadcast(context,0,i,PendingIntent.FLAG_CANCEL_CURRENT);
-        context.registerReceiver(myReceiver,new IntentFilter(filter));
-
-        final String fenceName = fence.getName();
-
-        Awareness.getFenceClient(context).updateFences(new FenceUpdateRequest.Builder().addFence(fence.getName(),fence.getMethod(),pi).build())
-        .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d("AwarenessHelper", "Fence registration successful: "  + fenceName);
-                registredFences.add(fence);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d("AwarenessHelper", "Fence registration failed for " + fenceName + ": " + e.getMessage());
-            }
-        });
-	}
-
-	private static void unregisterFence(final Fence fence){
-        final String fenceName = fence.getName();
-        Awareness.getFenceClient(context).updateFences(new FenceUpdateRequest.Builder().removeFence(fence.getName()).build())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("AwarenessLib", "Fence removal successful: " + fenceName);
-                        registredFences.remove(fence);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.d("AwarenessLib", "Fence removal failed for "+ fenceName + ": " + e.getMessage());
-                }
-        });
-    }
 
 }
