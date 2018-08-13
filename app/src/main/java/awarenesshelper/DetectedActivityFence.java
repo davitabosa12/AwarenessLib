@@ -16,6 +16,7 @@ public class DetectedActivityFence extends Fence {
         this.method = method;
     }
 
+
     @Override
     public AwarenessFence getMethod() {
         int size = params.getActivityTypeList().size();

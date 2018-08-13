@@ -47,7 +47,7 @@ public class LocationParameter implements FenceParameter {
     }
 
 
-    class Builder{
+    static class Builder{
         private double latitude;
         private double longitude;
         private double radius;

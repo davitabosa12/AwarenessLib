@@ -56,12 +56,13 @@ public class FenceManager {
         return true;
     }
 
-    public boolean registerFence(Fence fence){
+    @Nullable
+    public Task registerFence(Fence fence){
         //check if fence is already registered.
         if(isFenceRegistered(fence)){
 
             Log.d("AwarenessLib", "Fence " + fence.getName() + "is already registered.");
-            return false;
+            return null;
         }
         else{
             final FenceAction theFenceAction = fence.getAction();
@@ -80,60 +81,57 @@ public class FenceManager {
             final String fenceName = fence.getName();
 
             Task t = client.updateFences(new FenceUpdateRequest.Builder().addFence(fence.getName(),fence.getMethod(),pi).build());
-            while(!t.isComplete()); //join
-            if(t.isSuccessful()){
-                Log.d("AwarenessLib", "Fence registration successful: "  + fenceName);
-                registeredFences.add(fence);
-                return true;
-            } else {
-                Log.d("AwarenessLib", "Fence registration failed for " + fenceName + ": " + t.getException().getMessage());
-                return false;
-            }
+            return t;
         }
 
     }
-
-    public boolean unregisterFence(Fence fence){
+    @Nullable
+    public Task unregisterFence(Fence fence){
         if(isFenceRegistered(fence)){
             //unregister the fence
             final String fenceName = fence.getName();
             Task t = Awareness.getFenceClient(context).updateFences(new FenceUpdateRequest.Builder().removeFence(fence.getName()).build());
 
-            while(!t.isComplete()); //join
-            if(t.isSuccessful()) {
-
-                Log.d("AwarenessLib", "Fence removal successful: " + fenceName);
-                registeredFences.remove(fence);
-                return true;
-            } else {
-
-                Log.d("AwarenessLib", "Fence removal failed for " + fenceName + ": " + t.getException().getMessage());
-                return false;
-            }
-
+            t.addOnSuccessListener(new OnSuccessListener() {
+                @Override
+                public void onSuccess(Object o) {
+                    Log.d("AwarenessLib", "Fence removal successful: " + fenceName);
+                    registeredFences.remove(fence);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("AwarenessLib", "Fence removal failed for " + fenceName + ": " + t.getException().getMessage());
+                }
+            });
+            return t;
         } else{
             //can't unregister a fence thar is not registered
             Log.d("AwarenessLib","Can't unregister fence " + fence.getName() + " that is not registered");
-            return false;
+            return null;
         }
     }
 
-    public boolean unregisterAll(){
+    public void unregisterAll(){
 
         Iterator<Fence> it = registeredFences.iterator();
         while(it.hasNext()){
             Fence f  = it.next();
-            Task t = client.updateFences(new FenceUpdateRequest.Builder().removeFence(f.getName()).build());
-            while(t.isComplete()); //join
-            if(!t.isSuccessful()){
-                //error removing fence
-                Log.e("AwarenessLib", "Error removing fence " + f.getName() + ". " + t.getException().getMessage());
-                return false;
-            }
-            else{
-                it.remove();
-            }
+            Task t = unregisterFence(f);
+            t.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e("AwarenessLib", "Error removing fence " + f.getName() + ". " + t.getException().getMessage());
+                }
+            }).addOnSuccessListener(new OnSuccessListener() {
+                @Override
+                public void onSuccess(Object o) {
+                    it.remove();
+                }
+            });
+
         }
-        return true;
     }
+
+
 }

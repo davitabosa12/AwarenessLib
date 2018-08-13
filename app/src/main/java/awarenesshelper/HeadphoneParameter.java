@@ -16,7 +16,7 @@ public class HeadphoneParameter implements FenceParameter {
 
 
 
-    class Builder{
+    public static class Builder{
         private int headphoneState = 0;
         public Builder(){
 

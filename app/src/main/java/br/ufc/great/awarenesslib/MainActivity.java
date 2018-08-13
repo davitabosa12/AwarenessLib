@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.awareness.state.HeadphoneState;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +16,8 @@ import awarenesshelper.Fence;
 import awarenesshelper.FenceAction;
 import awarenesshelper.FenceManager;
 import awarenesshelper.HeadphoneFence;
+import awarenesshelper.HeadphoneMethod;
+import awarenesshelper.HeadphoneParameter;
 import awarenesshelper.LocationParameter;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,13 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
         actions.put("action1", new MyCustomAction());
 
-        Configurator.init(MainActivity.this, actions);
+        //Configurator.init(MainActivity.this, actions);
 
-        LocationParameter params = new LocationParameter();
-        params.setLatitude(3);
-        params.setLongitude(2);
-        //Fence f = new Fence("Localizacao do Great", FenceType.LOCATION, new MyCustomAction(), FenceMethod.LOCATION_ENTERING,params);
-        Fence f = new HeadphoneFence("teste",);
+        Fence f = new HeadphoneFence("a name", HeadphoneMethod.HEADPHONE_DURING,new MyCustomAction(), new HeadphoneParameter.Builder()
+                .setHeadphoneState(HeadphoneState.PLUGGED_IN)
+                .build());
         FenceManager.getInstance(this).registerFence(f);
 
         skip = findViewById(R.id.btn_recon);

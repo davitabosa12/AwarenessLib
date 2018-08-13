@@ -26,7 +26,7 @@ public class DetectedActivityParameter implements FenceParameter {
         activityTypeList.add(activityType);
     }
 
-    class Builder{
+    static class Builder{
         ArrayList<Integer> activityTypeList = new ArrayList<Integer>();
         public Builder(){
 

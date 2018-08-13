@@ -89,7 +89,7 @@ public class JSONParser {
         String fenceName = null, fenceAction = null;
         FenceType fenceType = null;
         FenceParameter params = null;
-        FenceMethod fenceMethod = null;
+        String fenceMethod = null;
         FenceAction action = null;
         jsonReader.beginObject(); //inicio objeto fence
         while(jsonReader.hasNext()){
@@ -106,7 +106,8 @@ public class JSONParser {
                         Log.e("AwarenessLib", "Action " + fenceAction + " not found in Action Map. Did you spell it correctly?");
                     break;
                 case "fenceMethod":
-                    fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
+                    //fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
+                    fenceMethod = jsonReader.nextString();
                     break;
                 case "fenceType":
                     String type = jsonReader.nextString();
@@ -141,22 +142,49 @@ public class JSONParser {
 
         }
         jsonReader.endObject();
-        return new Fence(fenceName,fenceType,action,fenceMethod,params);
+        switch(fenceType){
+            case DETECTED_ACTIVITY:
+                return new DetectedActivityFence(fenceName,DAMethod.valueOf(fenceMethod),action,(DetectedActivityParameter)params);
+            case LOCATION:
+                return new LocationFence(fenceName,LocationMethod.valueOf(fenceMethod),action,(LocationParameter)params);
+            case HEADPHONE:
+                return new HeadphoneFence(fenceName,HeadphoneMethod.valueOf(fenceMethod),action,(HeadphoneParameter)params);
+            default:
+                return null;
+        }
     }
 
-    private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) {
-        throw new UnsupportedOperationException("Under renovations.");
+    private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) throws IOException {
+        DetectedActivityParameter.Builder builder = new DetectedActivityParameter.Builder();
+        jsonReader.beginObject();
+        while(jsonReader.hasNext()){
+            String tag = jsonReader.nextName();
+            switch (tag){
+                case "activityTypes":
+                    jsonReader.beginArray();
+                        while(jsonReader.hasNext()){
+                            builder.addActivityType(jsonReader.nextInt());
+                        }
+                    jsonReader.endArray();
+                        break;
+                default:
+                    Log.w("AwarenessLib", "Unknown tag while reading Headphone Fence parameters: " + tag);
+                    break;
+            }
+        }
+        jsonReader.endObject();
+        return builder.build();
     }
 
     private HeadphoneParameter parseHeadphoneParams(JsonReader jsonReader) throws IOException {
-        HeadphoneParameter params = new HeadphoneParameter();
+        HeadphoneParameter.Builder paramsBuilder = new HeadphoneParameter.Builder();
         jsonReader.beginObject();
         while(jsonReader.hasNext()){
             String tag = jsonReader.nextName();
             switch(tag){
                 case "headphoneState":
                     int state = jsonReader.nextInt();
-                    params.setHeadphoneState(state);
+                    paramsBuilder = paramsBuilder.setHeadphoneState(state);
                     break;
                 default:
                     Log.w("AwarenessLib", "Unknown tag while reading Headphone Fence parameters: " + tag);
@@ -165,12 +193,12 @@ public class JSONParser {
         }
         jsonReader.endObject();
 
-        return params;
+        return paramsBuilder.build();
     }
     private LocationParameter parseLocationParams(JsonReader jsonReader) throws IOException {
-        LocationParameter params = new LocationParameter();
-        double latitude,longitude,radius;
-        long dwellTimeMillis;
+        LocationParameter.Builder builder = new LocationParameter.Builder();
+        double latitude = 0,longitude = 0,radius = 0;
+        long dwellTimeMillis = 1000;
         jsonReader.beginObject(); //
         while(jsonReader.hasNext()){
             String tag = jsonReader.nextName();
@@ -194,7 +222,7 @@ public class JSONParser {
         }
         jsonReader.endObject();
 
-        return params;
+        return builder.setLatitude(latitude).setLongitude(longitude).setRadius(radius).setDwellTimeMillis(dwellTimeMillis).build();
     }
 
 }
