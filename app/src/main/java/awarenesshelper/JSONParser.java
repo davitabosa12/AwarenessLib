@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -149,8 +148,8 @@ public class JSONParser {
         throw new UnsupportedOperationException("Under renovations.");
     }
 
-    private HeadphoneFenceParameter parseHeadphoneParams(JsonReader jsonReader) throws IOException {
-        HeadphoneFenceParameter params = new HeadphoneFenceParameter();
+    private HeadphoneParameter parseHeadphoneParams(JsonReader jsonReader) throws IOException {
+        HeadphoneParameter params = new HeadphoneParameter();
         jsonReader.beginObject();
         while(jsonReader.hasNext()){
             String tag = jsonReader.nextName();
@@ -168,8 +167,8 @@ public class JSONParser {
 
         return params;
     }
-    private LocationFenceParameter parseLocationParams(JsonReader jsonReader) throws IOException {
-        LocationFenceParameter params = new LocationFenceParameter();
+    private LocationParameter parseLocationParams(JsonReader jsonReader) throws IOException {
+        LocationParameter params = new LocationParameter();
         double latitude,longitude,radius;
         long dwellTimeMillis;
         jsonReader.beginObject(); //

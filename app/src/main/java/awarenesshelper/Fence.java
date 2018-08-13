@@ -1,47 +1,43 @@
 package awarenesshelper;
 
-import android.annotation.SuppressLint;
 import com.google.android.gms.awareness.fence.AwarenessFence;
-import com.google.android.gms.awareness.fence.DetectedActivityFence;
-import com.google.android.gms.awareness.fence.HeadphoneFence;
-import com.google.android.gms.awareness.fence.LocationFence;
 
-public class Fence {
+public abstract class Fence {
     private String name;
     private FenceType type;
     private FenceMethod method;
     private FenceAction action;
     private FenceParameter params;
 
-    public Fence(String name, FenceType type, FenceAction action, FenceMethod method, FenceParameter params){
+    Fence(String name, FenceType type, FenceAction action, FenceParameter params){
 		this.name = name;
 		this.type = type;
 		this.action = action;
 
 		switch (type){
-            case HEADPHONE:
-                if(!(params instanceof HeadphoneFenceParameter))
-                    throw new IllegalArgumentException("Fence parameters of different types, expected a HeadphoneFenceParameter, got " +
-                            params.getClass().getSimpleName());
-                break;
-            case LOCATION:
+                case HEADPHONE:
+                    if(!(params instanceof HeadphoneParameter))
+                        throw new IllegalArgumentException("Fence parameters of different types, expected a HeadphoneParameter, got " +
+                                params.getClass().getSimpleName());
+                    break;
+                case LOCATION:
 
-                if(!(params instanceof LocationFenceParameter))
-                    throw new IllegalArgumentException("Fence parameters of different types, expected a LocationFenceParameter, got " +
-                            params.getClass().getSimpleName());
-                break;
-            case DETECTED_ACTIVITY:
+                    if(!(params instanceof LocationParameter))
+                        throw new IllegalArgumentException("Fence parameters of different types, expected a LocationParameter, got " +
+                                params.getClass().getSimpleName());
+                    break;
+                case DETECTED_ACTIVITY:
 
-                if(!(params instanceof DetectedActivityFenceParameter))
-                    throw new IllegalArgumentException("Fence parameters of different types, expected a DetectedActivityFenceParameter, got " +
-                            params.getClass().getSimpleName());
-                break;
-            default:
-                break;
+                    if(!(params instanceof DetectedActivityParameter))
+                        throw new IllegalArgumentException("Fence parameters of different types, expected a DetectedActivityParameter, got " +
+                                params.getClass().getSimpleName());
+                    break;
+                default:
+                    break;
         }
         //TODO: validar methods
         this.params = params;
-        this.method = method;
+        //this.method = method;
         if(!validateMethods()){
             throw new IllegalArgumentException("Params of different methods.");
         }
@@ -54,16 +50,17 @@ public class Fence {
 		return action;
 	}
 
-	@SuppressLint("MissingPermission")
-    public AwarenessFence getMethod() {
-        DetectedActivityFenceParameter daParams;
-        LocationFenceParameter locParams;
-        HeadphoneFenceParameter hParams;
+	//@SuppressLint("MissingPermission")
+    public abstract AwarenessFence getMethod();
+    /*public AwarenessFence getMethod() {
+        DetectedActivityParameter daParams;
+        LocationParameter locParams;
+        HeadphoneParameter hParams;
 		switch (method){
             case DA_DURING:
                 int[] types;
             {
-                    daParams = (DetectedActivityFenceParameter) params;
+                    daParams = (DetectedActivityParameter) params;
                     types = new int[daParams.getActivityTypeList().size()];
                     for (int i = 0; i < daParams.getActivityTypeList().size(); i++) {
                         types[i] = daParams.getActivityTypeList().get(i);
@@ -72,7 +69,7 @@ public class Fence {
                 return DetectedActivityFence.during(types);
             case DA_STARTING:
                 {
-                    daParams = (DetectedActivityFenceParameter) params;
+                    daParams = (DetectedActivityParameter) params;
                     types = new int[daParams.getActivityTypeList().size()];
                     for (int i = 0; i < daParams.getActivityTypeList().size(); i++) {
                         types[i] = daParams.getActivityTypeList().get(i);
@@ -81,7 +78,7 @@ public class Fence {
                 return DetectedActivityFence.starting(types);
             case DA_STOPPING:
                 {
-                    daParams = (DetectedActivityFenceParameter) params;
+                    daParams = (DetectedActivityParameter) params;
                     types = new int[daParams.getActivityTypeList().size()];
                     for (int i = 0; i < daParams.getActivityTypeList().size(); i++) {
                         types[i] = daParams.getActivityTypeList().get(i);
@@ -89,17 +86,17 @@ public class Fence {
                 }
                 return DetectedActivityFence.stopping(types);
             case LOCATION_IN:
-                locParams = (LocationFenceParameter) params;
+                locParams = (LocationParameter) params;
                 return LocationFence.in(locParams.getLatitude(),locParams.getLongitude(),
                         locParams.getRadius(),locParams.getDwellTimeMillis());
             case LOCATION_EXITING:
-                locParams = (LocationFenceParameter) params;
+                locParams = (LocationParameter) params;
                 return LocationFence.exiting(locParams.getLatitude(),locParams.getLongitude(),locParams.getRadius());
             case LOCATION_ENTERING:
-                locParams = (LocationFenceParameter) params;
+                locParams = (LocationParameter) params;
                 return LocationFence.entering(locParams.getLatitude(),locParams.getLongitude(),locParams.getRadius());
             case HEADPHONE_DURING:
-                hParams = (HeadphoneFenceParameter) params;
+                hParams = (HeadphoneParameter) params;
                 return HeadphoneFence.during(hParams.getHeadphoneState());
             case HEADPHONE_UNPLUGGING:
                 return HeadphoneFence.unplugging();
@@ -109,7 +106,7 @@ public class Fence {
                 throw new UnsupportedOperationException("Not supported yet.");
         }
 	}
-
+*/
 	public String getName() {
 		return name;
 	}
