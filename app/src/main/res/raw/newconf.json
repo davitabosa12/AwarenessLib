@@ -1,0 +1,29 @@
+{
+  "activities": [
+    {
+      "name": "MainActivity",
+      "packet": "br.ufc.great.awarenesslib",
+      "fences": [
+        {
+          "fenceType": "2",
+          "fenceName": "stopped_moving",
+          "fenceAction": "br.ufc.great.awarenesslib.StoppedMovingAction",
+          "fenceMethod": "ActivityDetection.STOPPING",
+          "params": {
+            "activityTypes": []
+          }
+        },
+        {
+          "fenceType": "2",
+          "fenceName": "started_moving",
+          "fenceAction": "br.ufc.great.awarenesslib.StartedMovingAction",
+          "fenceMethod": "ActivityDetection.STARTING",
+          "params": {
+            "activityTypes": []
+          }
+        }
+      ],
+      "snapshots": []
+    }
+  ]
+}

@@ -1,53 +1,43 @@
 package br.ufc.great.awarenesslib;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 
-import com.google.android.gms.awareness.state.HeadphoneState;
+import com.google.android.gms.location.DetectedActivity;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import awarenesshelper.Configurator;
-import awarenesshelper.Fence;
-import awarenesshelper.FenceAction;
+import awarenesshelper.AndFence;
+import awarenesshelper.DAMethod;
+import awarenesshelper.DetectedActivityFence;
+import awarenesshelper.DetectedActivityParameter;
 import awarenesshelper.FenceManager;
 import awarenesshelper.HeadphoneFence;
 import awarenesshelper.HeadphoneMethod;
-import awarenesshelper.HeadphoneParameter;
-import awarenesshelper.LocationParameter;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button skip;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.intent_data);
+        HeadphoneFence pluggedIn = new HeadphoneFence("plugged",HeadphoneMethod.HEADPHONE_PLUGGING_IN,new VibeAction(),null);
+        DetectedActivityFence walking = new DetectedActivityFence("walking", DAMethod.DA_STARTING, new VibeAction(),
+                new DetectedActivityParameter.Builder().addActivityType(DetectedActivity.WALKING).build());
 
-        Map<String, FenceAction> actions = new HashMap<>();
+        AndFence and = new AndFence("composition",new LightAction(this,"hello world"),pluggedIn,walking);
 
-        actions.put("action1", new MyCustomAction());
+        FenceManager.getInstance(this).registerFence(pluggedIn);
+        FenceManager.getInstance(this).registerFence(walking);
+        FenceManager.getInstance(this).registerFence(and);
 
-        //Configurator.init(MainActivity.this, actions);
 
-        Fence f = new HeadphoneFence("a name", HeadphoneMethod.HEADPHONE_DURING,new MyCustomAction(), new HeadphoneParameter.Builder()
-                .setHeadphoneState(HeadphoneState.PLUGGED_IN)
-                .build());
-        FenceManager.getInstance(this).registerFence(f);
+    }
 
-        skip = findViewById(R.id.btn_recon);
-
-        skip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), ReconActivity.class));
-            }
-        });
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FenceManager manager = FenceManager.getInstance(this);
+        manager.unregisterAll();
     }
 }

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import br.ufc.great.awarenesslib.R;
+
 /**
  * Created by davitabosa on 08/08/2018.
  */
@@ -25,6 +27,7 @@ public class JSONParser {
     public JSONParser(Context context, Map<String, FenceAction> actions) {
         this.actions = actions;
         this.context = context;
+
     }
 
     public List<AwarenessActivity> readJSON() throws IOException {

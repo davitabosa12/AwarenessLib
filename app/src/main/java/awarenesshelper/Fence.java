@@ -14,7 +14,7 @@ public abstract class Fence {
 		this.type = type;
 		this.action = action;
 
-		switch (type){
+		/*switch (type){
                 case HEADPHONE:
                     if(!(params instanceof HeadphoneParameter))
                         throw new IllegalArgumentException("Fence parameters of different types, expected a HeadphoneParameter, got " +
@@ -34,7 +34,7 @@ public abstract class Fence {
                     break;
                 default:
                     break;
-        }
+        }*/
         //TODO: validar methods
         this.params = params;
         //this.method = method;
@@ -49,6 +49,7 @@ public abstract class Fence {
 	public FenceAction getAction() {
 		return action;
 	}
+
 
 	//@SuppressLint("MissingPermission")
     public abstract AwarenessFence getMethod();

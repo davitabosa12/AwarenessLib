@@ -7,7 +7,7 @@ import java.util.Map;
  * Created by davitabosa on 13/08/2018.
  */
 
-enum LocationMethod {
+public enum LocationMethod {
     LOCATION_ENTERING("Location.ENTERING"),
     LOCATION_EXITING("Location.EXITING"),
     LOCATION_IN("Location.IN");

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AwarenessLib</string>
+    <string-array name="spinner_entries">
+        <item>Entering</item>
+        <item>Exiting</item>
+        <item>In</item>
+    </string-array>
 </resources>

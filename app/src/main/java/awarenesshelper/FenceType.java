@@ -10,7 +10,9 @@ public enum FenceType {
 
 	HEADPHONE("Headphone"),
 
-	LOCATION("Location");
+	LOCATION("Location"),
+	OR("or"),
+	AND("and");
 	private static final Map<String, FenceType> map = new HashMap<>();
 	static {
 		for (FenceType en : values()) {

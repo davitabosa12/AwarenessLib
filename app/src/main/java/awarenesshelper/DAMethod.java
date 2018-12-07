@@ -7,7 +7,7 @@ import java.util.Map;
  * Created by davitabosa on 13/08/2018.
  */
 
-enum DAMethod {
+public enum DAMethod {
     DA_DURING("DetectedActivity.DURING"),
     DA_STARTING("DetectedActivity.STARTING"),
     DA_STOPPING("DetectedActivity.STOPPING");
