@@ -9,6 +9,8 @@ import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +23,12 @@ import br.ufc.great.awarenesslib.R;
  */
 
 public class JSONParser {
-    Map<String, FenceAction> actions;
+    private static final String TAG = "JSONParser";
+
     Context context;
 
-    public JSONParser(Context context, Map<String, FenceAction> actions) {
-        this.actions = actions;
+    public JSONParser(Context context) {
+
         this.context = context;
 
     }
@@ -33,16 +36,23 @@ public class JSONParser {
     public List<AwarenessActivity> readJSON() throws IOException {
         Gson g = new Gson();
         List<AwarenessActivity> activities = null;
-        Reader r = new FileReader(new File("res/configuration.json"));
+        //Reader r = new FileReader(new File("res/configuration.json")); will throw FileNotFoundException
+        InputStream is = context.getResources().openRawResource(context.getResources().getIdentifier("configuration",
+                "raw", context.getPackageName()));
+        Reader r = new InputStreamReader(is);
+
+
         JsonReader jsonReader = g.newJsonReader(r); //fazer um novo reader de json
 
         jsonReader.beginObject(); //espera um inicio de objeto
-        if(jsonReader.peek().name().equals("activities")){
-            jsonReader.nextName();
+        String peekTagName = jsonReader.nextName();
+        if(peekTagName.equals("activities")){
+            //jsonReader.nextName();
             activities = parseActivitiesList(jsonReader);
         }
 
         Log.d("AwarenessHelper", "JSON lido..");
+        Log.d(TAG, "readJSON: " + activities.toString());
         return activities;
 
 
@@ -63,18 +73,29 @@ public class JSONParser {
 
 
     private AwarenessActivity parseActivity(JsonReader jsonReader) throws IOException {
+        Log.d(TAG, "parseActivity: parsing");
         jsonReader.beginObject();
         jsonReader.nextName(); // "name" tag
         String activityName = jsonReader.nextString();
+        Log.d(TAG, "parseActivity: activityName = " +activityName);
         jsonReader.nextName(); // "packet" tag
         String activityPacket = jsonReader.nextString();
+        Log.d(TAG, "parseActivity: activityPacket= " +activityPacket);
         jsonReader.nextName(); // "fences" tag
         ArrayList<Fence> fence = parseFenceList(jsonReader);
+        //ler snapshots
+        jsonReader.nextName(); // snapshots
+        jsonReader.beginArray(); //[
+        jsonReader.endArray(); // ]
         jsonReader.endObject();
-        return new AwarenessActivity(activityPacket + activityName,fence);
+
+        AwarenessActivity act = new AwarenessActivity(activityPacket + "." + activityName,fence);
+        return act;
+
     }
 
     private ArrayList<Fence> parseFenceList(JsonReader jsonReader) throws IOException {
+        Log.d(TAG, "parseFenceList: parsing");
         ArrayList<Fence> fencesList = new ArrayList<Fence>();
         jsonReader.beginArray(); //inicio "fences" array
         while(jsonReader.hasNext()){
@@ -82,15 +103,22 @@ public class JSONParser {
                 fencesList.add(parseFence(jsonReader));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
             }
         }
         jsonReader.endArray();
+        Log.d(TAG, "parseFenceList: finished parsing fence list");
         return fencesList;
 
 
     }
 
-    private Fence parseFence(JsonReader jsonReader) throws IOException, ClassNotFoundException{
+    private Fence parseFence(JsonReader jsonReader) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        Log.d(TAG, "parseFence: parsing...");
+
         String fenceName = null, fenceAction = null;
         FenceType fenceType = null;
         FenceParameter params = null;
@@ -102,20 +130,26 @@ public class JSONParser {
             switch(tag){
                 case "fenceName":
                     fenceName = jsonReader.nextString();
+                    Log.d(TAG, "parseFence: parsed Fence name: " + fenceName);
                     break;
                 case "fenceAction":
 
                     fenceAction = jsonReader.nextString();
-                    action = actions.get(fenceAction);
+                    action = (FenceAction) Class.forName(fenceAction).newInstance();
                     if(action == null)
                         Log.e("AwarenessLib", "Action " + fenceAction + " not found in Action Map. Did you spell it correctly?");
+                    Log.d(TAG, "parseFence: parsed action: " + fenceAction);
+                    Log.d(TAG, "parseFence: the action: " + action.toString());
                     break;
                 case "fenceMethod":
                     //fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
                     String onJson = jsonReader.nextString();
-                    String[] methodAndType = onJson.split(".");
-                    fenceType = FenceType.valueOf(methodAndType[0]);
+                    String[] methodAndType = onJson.split("\\."); //thx regex
+                    Log.d(TAG, "parseFence: " + methodAndType[0] + "  " + methodAndType[1]);
+                    fenceType = FenceType.valueFor(methodAndType[0]);
+                    Log.d(TAG, "parseFence: parsed type: " + fenceType);
                     fenceMethod = methodAndType[1];
+                    Log.d(TAG, "parseFence: parsed method: " + fenceMethod);
                     break;
                 case "fenceType":
                     /*
@@ -126,6 +160,8 @@ public class JSONParser {
                         Log.e("AwarenessLib", "FenceType not supported: " + type);
                         e.printStackTrace();
                     }*/
+                    //IGNORE AND GET THE NUMBER
+                    jsonReader.nextString();
                     break;
                 case "params":
                     switch(fenceType){
@@ -153,17 +189,21 @@ public class JSONParser {
         jsonReader.endObject();
         switch(fenceType){
             case DETECTED_ACTIVITY:
-                return new DetectedActivityFence(fenceName,DAMethod.valueOf(fenceMethod),action,(DetectedActivityParameter)params);
+                Log.d(TAG, "parseFence: returning DetectedActivity");
+                return new DetectedActivityFence(fenceName,DAMethod.valueFor(fenceMethod),action,(DetectedActivityParameter)params);
             case LOCATION:
-                return new LocationFence(fenceName,LocationMethod.valueOf(fenceMethod),action,(LocationParameter)params);
+                Log.d(TAG, "parseFence: returning Location");
+                return new LocationFence(fenceName,LocationMethod.valueFor(fenceMethod),action,(LocationParameter)params);
             case HEADPHONE:
-                return new HeadphoneFence(fenceName,HeadphoneMethod.valueOf(fenceMethod),action,(HeadphoneParameter)params);
+                Log.d(TAG, "parseFence: returning Headphone");
+                return new HeadphoneFence(fenceName,HeadphoneMethod.valueFor(fenceMethod),action,(HeadphoneParameter)params);
             default:
                 return null;
         }
     }
 
     private FenceParameter parseDetectedActivityParams(JsonReader jsonReader) throws IOException {
+        Log.d(TAG, "parseDetectedActivityParams: parsing");
         DetectedActivityParameter.Builder builder = new DetectedActivityParameter.Builder();
         jsonReader.beginObject();
         while(jsonReader.hasNext()){
@@ -172,7 +212,9 @@ public class JSONParser {
                 case "activityTypes":
                     jsonReader.beginArray();
                         while(jsonReader.hasNext()){
-                            builder.addActivityType(jsonReader.nextInt());
+                            String actType = jsonReader.nextString();
+                            Log.d(TAG, "parseDetectedActivityParams: type: " + actType);
+                            builder.addActivityType(actType);
                         }
                     jsonReader.endArray();
                         break;
@@ -192,7 +234,7 @@ public class JSONParser {
             String tag = jsonReader.nextName();
             switch(tag){
                 case "headphoneState":
-                    int state = jsonReader.nextInt();
+                    String state = jsonReader.nextString();
                     paramsBuilder = paramsBuilder.setHeadphoneState(state);
                     break;
                 default:

@@ -2,8 +2,10 @@ package br.ufc.great.awarenesslib;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.awareness.fence.FenceState;
 
@@ -33,6 +35,9 @@ public class StoppedMovingAction implements FenceAction {
             if(result < 0){
                 Log.e(TAG, "doOperation: failed inserting row");
             }
+            Intent update = new Intent("UPDATE_AWARENESSLIB");
+            context.sendBroadcast(update);
+            Toast.makeText(context, "Stopped", Toast.LENGTH_SHORT).show();
 
         }
     }

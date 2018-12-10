@@ -21,7 +21,7 @@ public class ReconActivity extends AppCompatActivity {
         TextView textView = findViewById(R.id.txv_result);
         Map<String, FenceAction> actions = new HashMap<>();
         actions.put("complex_action", new ComplexAction(textView));
-        Configurator.init(ReconActivity.this, actions);
+        Configurator.init(ReconActivity.this);
 
     }
 }

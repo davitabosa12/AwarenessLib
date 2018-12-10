@@ -8,9 +8,9 @@ import java.util.Map;
  */
 
 public enum DAMethod {
-    DA_DURING("DetectedActivity.DURING"),
-    DA_STARTING("DetectedActivity.STARTING"),
-    DA_STOPPING("DetectedActivity.STOPPING");
+    DA_DURING("DURING"),
+    DA_STARTING("STARTING"),
+    DA_STOPPING("STOPPING");
     private String value;
     private static final Map<String, DAMethod> map = new HashMap<>();
     static {

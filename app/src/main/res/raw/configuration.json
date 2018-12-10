@@ -1,34 +1,48 @@
 {
-    "activities":[  
+    "activities": [
         {
-            "name": "package.name.awarenesslib.MainActivity",
-            "fences" : [
+            "name": "MainActivity",
+            "packet": "br.ufc.great.awarenesslib",
+            "fences": [
                 {
-                    "fenceName": "Headphone",
-                    "fenceAction": "action1",
-                    "fenceType":  "Headphone",
+                    "fenceType": "1",
+                    "fenceName": "headphone_fence",
+                    "fenceAction": "br.ufc.great.awarenesslib.HeadphoneAction",
                     "fenceMethod": "Headphone.DURING",
                     "params": {
-                        "headphoneState": 1
+                        "headphoneState": "PLUGGED_IN"
                     }
-                }
-            ]
-            
-        },
-        {
-            "name": "package.name.awarenesslib.ReconActivity",
-            "fences" : [
+                },
                 {
-                    "fenceName": "Nome Qualquer",
-                    "fenceAction": "complex_action",
-                    "fenceType":  "DetectedActivity",
-                    "fenceMethod": "DetectedActivity.STARTING",
+                    "fenceType": "2",
+                    "fenceName": "stopping_fence",
+                    "fenceAction": "br.ufc.great.awarenesslib.StoppedMovingAction",
+                    "fenceMethod": "ActivityDetection.STOPPING",
                     "params": {
-                        "activityTypes" : [0,1,2,7,8]
+                        "activityTypes": [
+                            "ON_BICYCLE",
+                            "ON_FOOT",
+                            "RUNNING",
+                            "WALKING"
+                        ]
+                    }
+                },
+                {
+                    "fenceType": "2",
+                    "fenceName": "starting_fence",
+                    "fenceAction": "br.ufc.great.awarenesslib.StartedMovingAction",
+                    "fenceMethod": "ActivityDetection.STARTING",
+                    "params": {
+                        "activityTypes": [
+                            "ON_BICYCLE",
+                            "ON_FOOT",
+                            "RUNNING",
+                            "WALKING"
+                        ]
                     }
                 }
-            ]
-
+            ],
+            "snapshots": []
         }
     ]
 }

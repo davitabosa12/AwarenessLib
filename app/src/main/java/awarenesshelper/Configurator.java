@@ -25,7 +25,7 @@ public class Configurator {
     private static List<AwarenessActivity> activities;
     private static FenceManager fenceManager;
 
-    private Configurator(Activity activity, Map<String, FenceAction> actions) {
+    private Configurator(Activity activity) {
         this.activity = activity;
         context = activity.getApplicationContext();
         fenceManager = FenceManager.getInstance(context);
@@ -36,23 +36,23 @@ public class Configurator {
         Log.d("AwarenessLib", activityName);
 
         try {
-            activities = new JSONParser(context, actions).readJSON();
+            activities = new JSONParser(context).readJSON();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Configurator(Service service, Map<String, FenceAction> actions) {
+    private Configurator(Service service) {
         this.service = service;
         context = service.getApplicationContext();
         fenceManager = FenceManager.getInstance(context);
         activityName = service.getClass().getName();
-        JSONParser parser = new JSONParser(context, actions);
+        JSONParser parser = new JSONParser(context);
         Log.d("AwarenessLib", activityName);
 
         try {
-            activities = new JSONParser(context, actions).readJSON();
+            activities = new JSONParser(context).readJSON();
         } catch (IOException e) {
             Log.e("AwarenessLib", "Error reading JSON");
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class Configurator {
             public Configurator call() throws Exception {
                 if (instance == null) {
                     Log.d("AwarenessLib", service.getClass().getName());
-                    instance = new Configurator(service, actions);
+                    instance = new Configurator(service);
                 } else {
                     activityName = service.getClass().getName();
                 }
@@ -107,7 +107,7 @@ public class Configurator {
 
     }
 
-    public static Future<Configurator> init(Activity activity, Map<String, FenceAction> actions) {
+    public static Future<Configurator> init(Activity activity) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         return executor.submit(new Callable<Configurator>() {
 
@@ -115,7 +115,7 @@ public class Configurator {
             public Configurator call() throws Exception {
                 if (instance == null) {
                     Log.d("AwarenessLib", activity.getClass().getName());
-                    instance = new Configurator(activity, actions);
+                    instance = new Configurator(activity);
                 } else {
                     activityName = activity.getClass().getName();
                     context = activity.getApplicationContext();
@@ -124,7 +124,8 @@ public class Configurator {
                 //unregister fences
                 fenceManager.unregisterAll();
                 for (AwarenessActivity a : activities) {
-                    if (a.getName().equals(activityName)) {
+                    String name = a.getName();
+                    if (name.equals(activityName)) {
                         ArrayList<Fence> fs = a.getFences();
                         for (Fence f : fs) {
                             fenceManager.registerFence(f);

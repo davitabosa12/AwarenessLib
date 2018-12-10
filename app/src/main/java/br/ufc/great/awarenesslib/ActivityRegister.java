@@ -12,5 +12,7 @@ import java.sql.Time;
 public class ActivityRegister {
     public static final String STARTED = "started";
     public static final String STOPPED = "stopped";
+    public static final String HEADPHONE_CONNECTED = "connected";
+    public static final String HEADPHONE_DISCONNECTED = "disconnected";
 
 }

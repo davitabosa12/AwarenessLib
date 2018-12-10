@@ -1,5 +1,8 @@
 package awarenesshelper;
 
+import com.google.android.gms.awareness.fence.HeadphoneFence;
+import com.google.android.gms.awareness.state.HeadphoneState;
+
 /**
  * Created by davitabosa on 18/06/2018.
  */
@@ -24,6 +27,15 @@ public class HeadphoneParameter implements FenceParameter {
 
         public Builder setHeadphoneState(int headphoneState) {
             this.headphoneState = headphoneState;
+            return this;
+        }
+        public Builder setHeadphoneState(String state){
+            this.headphoneState = HeadphoneState.PLUGGED_IN;
+            if (state.equals("PLUGGED_IN")) {
+                this.headphoneState = HeadphoneState.PLUGGED_IN;
+            } else if(state.equals("UNPLUGGING")){
+                this.headphoneState = HeadphoneState.UNPLUGGED;
+            }
             return this;
         }
 

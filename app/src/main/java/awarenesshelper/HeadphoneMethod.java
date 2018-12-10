@@ -8,9 +8,9 @@ import java.util.Map;
  */
 
 public enum HeadphoneMethod {
-    HEADPHONE_DURING("Headphone.DURING"),
-    HEADPHONE_PLUGGING_IN("Headphone.PLUGGING_IN"),
-    HEADPHONE_UNPLUGGING("Headphone.UNPLUGGING");
+    HEADPHONE_DURING("DURING"),
+    HEADPHONE_PLUGGING_IN("PLUGGING_IN"),
+    HEADPHONE_UNPLUGGING("UNPLUGGING");
     private String value;
     private static final Map<String, HeadphoneMethod> map = new HashMap<>();
     static {

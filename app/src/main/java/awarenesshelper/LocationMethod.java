@@ -8,9 +8,9 @@ import java.util.Map;
  */
 
 public enum LocationMethod {
-    LOCATION_ENTERING("Location.ENTERING"),
-    LOCATION_EXITING("Location.EXITING"),
-    LOCATION_IN("Location.IN");
+    LOCATION_ENTERING("ENTERING"),
+    LOCATION_EXITING("EXITING"),
+    LOCATION_IN("IN");
     private String value;
     private static final Map<String, LocationMethod> map = new HashMap<>();
     static {
