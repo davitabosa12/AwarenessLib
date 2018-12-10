@@ -66,10 +66,12 @@ public class JSONParser {
         jsonReader.beginObject();
         jsonReader.nextName(); // "name" tag
         String activityName = jsonReader.nextString();
+        jsonReader.nextName(); // "packet" tag
+        String activityPacket = jsonReader.nextString();
         jsonReader.nextName(); // "fences" tag
         ArrayList<Fence> fence = parseFenceList(jsonReader);
         jsonReader.endObject();
-        return new AwarenessActivity(activityName,fence);
+        return new AwarenessActivity(activityPacket + activityName,fence);
     }
 
     private ArrayList<Fence> parseFenceList(JsonReader jsonReader) throws IOException {

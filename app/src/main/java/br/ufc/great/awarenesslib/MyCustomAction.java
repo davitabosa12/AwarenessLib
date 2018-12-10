@@ -1,6 +1,8 @@
 package br.ufc.great.awarenesslib;
 
 import android.content.Context;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.awareness.fence.FenceState;
@@ -14,21 +16,25 @@ import awarenesshelper.FenceAction;
  */
 
 public class MyCustomAction implements FenceAction {
-    public MyCustomAction(){}
+    TextView text;
+    public MyCustomAction(TextView text){
+        this.text = text;
+    }
     @Override
     public void doOperation(Context context, FenceState state) {
-        String msg = "Headphone está ";
         switch (state.getCurrentState()){
             case FenceState.TRUE:
-                msg += "plugado.";
+                text.setText("Connected");
+                text.setTextColor(context.getResources().getColor(R.color.awareGreen));
                 break;
             case FenceState.FALSE:
-                msg += "desplugado.";
+                text.setText("Disconnected");
+                text.setTextColor(context.getResources().getColor(R.color.awareRed));
                 break;
             case FenceState.UNKNOWN:
-                msg = "não foi possivel obter estado do headphone.";
+                text.setText("Unknown");
+                text.setTextColor(context.getResources().getColor(R.color.awareGray));
                 break;
         }
-        Toast.makeText(context,msg,Toast.LENGTH_SHORT).show();
     }
 }

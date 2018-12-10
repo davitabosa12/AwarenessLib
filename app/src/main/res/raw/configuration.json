@@ -1,7 +1,7 @@
 {
     "activities":[  
         {
-            "name": "br.ufc.great.awarenesslib.MainActivity",
+            "name": "package.name.awarenesslib.MainActivity",
             "fences" : [
                 {
                     "fenceName": "Headphone",
@@ -16,7 +16,7 @@
             
         },
         {
-            "name": "br.ufc.great.awarenesslib.ReconActivity",
+            "name": "package.name.awarenesslib.ReconActivity",
             "fences" : [
                 {
                     "fenceName": "Nome Qualquer",

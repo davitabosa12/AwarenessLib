@@ -6,7 +6,7 @@ import java.util.Map;
 public enum FenceType {
 
 
-	DETECTED_ACTIVITY("DetectedActivity"),
+	DETECTED_ACTIVITY("ActivityDetection"),
 
 	HEADPHONE("Headphone"),
 
