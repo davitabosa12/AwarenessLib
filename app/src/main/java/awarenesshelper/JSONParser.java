@@ -112,16 +112,20 @@ public class JSONParser {
                     break;
                 case "fenceMethod":
                     //fenceMethod = FenceMethod.valueOf(jsonReader.nextString());
-                    fenceMethod = jsonReader.nextString();
+                    String onJson = jsonReader.nextString();
+                    String[] methodAndType = onJson.split(".");
+                    fenceType = FenceType.valueOf(methodAndType[0]);
+                    fenceMethod = methodAndType[1];
                     break;
                 case "fenceType":
+                    /*
                     String type = jsonReader.nextString();
                     try{
                         fenceType = FenceType.valueOf(type);
                     } catch (IllegalArgumentException e){
                         Log.e("AwarenessLib", "FenceType not supported: " + type);
                         e.printStackTrace();
-                    }
+                    }*/
                     break;
                 case "params":
                     switch(fenceType){

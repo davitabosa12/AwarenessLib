@@ -2,6 +2,8 @@ package awarenesshelper;
 
 import android.util.Log;
 
+import com.google.android.gms.awareness.fence.DetectedActivityFence;
+
 import java.util.ArrayList;
 
 /**
@@ -33,6 +35,25 @@ public class DetectedActivityParameter implements FenceParameter {
         }
         public Builder addActivityType(int activityType){
             activityTypeList.add(activityType);
+            return this;
+        }
+
+        public Builder addActivityType(String activityName){
+            if(activityName.equals("IN_VEHICLE")){
+                activityTypeList.add(DetectedActivityFence.IN_VEHICLE);
+            } else if(activityName.equals("RUNNING")){
+                activityTypeList.add(DetectedActivityFence.RUNNING);
+            } else if(activityName.equals("ON_FOOT")){
+                activityTypeList.add(DetectedActivityFence.ON_FOOT);
+            } else if(activityName.equals("ON_BICYCLE")){
+                activityTypeList.add(DetectedActivityFence.ON_BICYCLE);
+            } else if(activityName.equals("STILL")){
+                activityTypeList.add(DetectedActivityFence.STILL);
+            } else if(activityName.equals("WALKING")){
+                activityTypeList.add(DetectedActivityFence.WALKING);
+            } else if(activityName.equals("UNKNOWN")){
+                activityTypeList.add(DetectedActivityFence.UNKNOWN);
+            }
             return this;
         }
 
