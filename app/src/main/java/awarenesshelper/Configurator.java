@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.util.Log;
-import com.google.android.gms.awareness.Awareness;
-import com.google.android.gms.awareness.FenceClient;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -22,7 +20,7 @@ public class Configurator {
     private static Context context;
     private static Configurator instance;
     private static String activityName;
-    private static List<AwarenessActivity> activities;
+    private static List<AwarenessActivityModel> activities;
     private static FenceManager fenceManager;
 
     private Configurator(Activity activity) {
@@ -92,7 +90,7 @@ public class Configurator {
 
                 //unregister fences
                 fenceManager.unregisterAll();
-                for (AwarenessActivity a : activities) {
+                for (AwarenessActivityModel a : activities) {
                     if (a.getName().equals(activityName)) {
                         ArrayList<Fence> fs = a.getFences();
                         for (Fence f : fs) {
@@ -123,7 +121,7 @@ public class Configurator {
                 }
                 //unregister fences
                 fenceManager.unregisterAll();
-                for (AwarenessActivity a : activities) {
+                for (AwarenessActivityModel a : activities) {
                     String name = a.getName();
                     if (name.equals(activityName)) {
                         ArrayList<Fence> fs = a.getFences();

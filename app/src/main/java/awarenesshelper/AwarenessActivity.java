@@ -1,27 +1,36 @@
 package awarenesshelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 
-/**
- * Created by davitabosa on 13/06/2018.
- */
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.SnapshotClient;
 
-public class AwarenessActivity {
-    private String name;
-    private ArrayList<Fence> fences;
+public class AwarenessActivity extends Activity {
 
-    public AwarenessActivity(String name, ArrayList<Fence> fences){
-        this.name = name;
-        this.fences = fences;
+    private SnapshotClient client;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Configurator.init(this);
+        client = Awareness.getSnapshotClient(this);
+        /*client.getBeaconState();
+        client.getDetectedActivity();
+        client.getHeadphoneState();
+        client.getLocation();
+        client.getPlaces();
+        client.getTimeIntervals();
+        client.getWeather();*/
+    }
+
+    /**
+     * Initialize snapshots that you want to use
+     * @param snapshots
+     */
+    public final void setSnapshots(int ...snapshots){
+
     }
 
 
-    public String getName() {
-        return name;
-    }
-
-    public ArrayList<Fence> getFences() {
-        return fences;
-    }
 }

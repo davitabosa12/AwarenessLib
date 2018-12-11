@@ -7,13 +7,22 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.SnapshotClient;
+import com.google.android.gms.awareness.snapshot.DetectedActivityResponse;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
@@ -31,11 +40,12 @@ import awarenesshelper.HeadphoneFence;
 import awarenesshelper.HeadphoneMethod;
 import br.ufc.great.awarenesslib.ActivityRegisterContract.ActivityRegisterEntry;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnCompleteListener<DetectedActivityResponse> {
 
     ArrayList<Pair<String, DateTime>> data;
     LinearLayout ll;
     BroadcastReceiver receiver;
+    Button btn;
 
 
     @Override
@@ -47,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         data = new ArrayList<>();
         JodaTimeAndroid.init(this);
         ll = findViewById(R.id.linearScroll);
+        btn = findViewById(R.id.btn_probability);
+        btn.setOnClickListener(this);
 
         updateData();
 
@@ -101,6 +113,20 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(pair.first + "---->>" + pair.second.toString());
             ll.addView(textView);
         }
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        SnapshotClient client = Awareness.getSnapshotClient(this);
+        client.getDetectedActivity().addOnCompleteListener(this);
+    }
+
+    @Override
+    public void onComplete(@NonNull Task<DetectedActivityResponse> task) {
+        DetectedActivity resp = task.getResult().getActivityRecognitionResult().getMostProbableActivity();
+        Toast.makeText(this, "Current activity: " + resp.toString(), Toast.LENGTH_SHORT).show();
+
 
     }
 }

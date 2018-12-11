@@ -1,0 +1,27 @@
+package awarenesshelper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+/**
+ * Created by davitabosa on 13/06/2018.
+ */
+
+public class AwarenessActivityModel {
+    private String name;
+    private ArrayList<Fence> fences;
+
+    public AwarenessActivityModel(String name, ArrayList<Fence> fences){
+        this.name = name;
+        this.fences = fences;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public ArrayList<Fence> getFences() {
+        return fences;
+    }
+}
