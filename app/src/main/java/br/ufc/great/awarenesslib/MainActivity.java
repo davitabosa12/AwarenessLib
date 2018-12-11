@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
@@ -30,17 +29,15 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
-import awarenesshelper.AndFence;
 import awarenesshelper.Configurator;
-import awarenesshelper.DAMethod;
-import awarenesshelper.DetectedActivityFence;
-import awarenesshelper.DetectedActivityParameter;
+
 import awarenesshelper.FenceManager;
-import awarenesshelper.HeadphoneFence;
-import awarenesshelper.HeadphoneMethod;
+
+import awarenesshelper.SnapshotType;
+import awarenesshelper.activity.AwarenessAppCompatActivity;
 import br.ufc.great.awarenesslib.ActivityRegisterContract.ActivityRegisterEntry;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnCompleteListener<DetectedActivityResponse> {
+public class MainActivity extends AwarenessAppCompatActivity implements View.OnClickListener {
 
     ArrayList<Pair<String, DateTime>> data;
     LinearLayout ll;
@@ -53,13 +50,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        Configurator.init(this);
         data = new ArrayList<>();
         JodaTimeAndroid.init(this);
         ll = findViewById(R.id.linearScroll);
         btn = findViewById(R.id.btn_probability);
         btn.setOnClickListener(this);
 
+        setSnapshots(SnapshotType.PLACES, SnapshotType.TIME_INTERVAL);
         updateData();
 
 
@@ -113,20 +110,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             textView.setText(pair.first + "---->>" + pair.second.toString());
             ll.addView(textView);
         }
-
     }
 
     @Override
     public void onClick(View v) {
-        SnapshotClient client = Awareness.getSnapshotClient(this);
-        client.getDetectedActivity().addOnCompleteListener(this);
-    }
-
-    @Override
-    public void onComplete(@NonNull Task<DetectedActivityResponse> task) {
-        DetectedActivity resp = task.getResult().getActivityRecognitionResult().getMostProbableActivity();
-        Toast.makeText(this, "Current activity: " + resp.toString(), Toast.LENGTH_SHORT).show();
-
+        String  place = getMostProbablePlace().toString();
+        Toast.makeText(this, "Voce esta em " + place, Toast.LENGTH_SHORT).show();
 
     }
 }

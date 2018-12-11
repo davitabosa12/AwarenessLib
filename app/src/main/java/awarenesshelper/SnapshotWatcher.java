@@ -11,12 +11,12 @@ import android.content.Intent;
  */
 
 public class SnapshotWatcher {
-    public static final int HEADPHONE = 1 << 1;
-    public static final int DETECTED_ACTIVITY = 1 << 2;
-    public static final int TIME_INTERVALS = 1 << 3;
-    public static final int LOCATION = 1 << 4;
-    public static final int PLACES = 1 << 5;
-    public static final int WEATHER = 1 << 6;
+    public static final int HEADPHONE = 1;
+    public static final int DETECTED_ACTIVITY = 1 << 1;
+    public static final int TIME_INTERVALS = 1 << 2;
+    public static final int LOCATION = 1 << 3;
+    public static final int PLACES = 1 << 4;
+    public static final int WEATHER = 1 << 5;
     public static final int ALL = 111111;
 
     private int contextsToWatch;
@@ -30,6 +30,7 @@ public class SnapshotWatcher {
     public SnapshotWatcher(Context ctx){
         this.contextsToWatch = ALL;
         this.context = ctx;
+        //TODO: Replace AlarmManager with Jetpack Tasks
         this.manager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         this.millisToWait = 60*1000;
     }
