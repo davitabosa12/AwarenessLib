@@ -6,17 +6,12 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import br.ufc.great.awarenesslib.R;
 
 /**
  * Created by davitabosa on 08/08/2018.
@@ -33,9 +28,9 @@ public class JSONParser {
 
     }
 
-    public List<AwarenessActivity> readJSON() throws IOException {
+    public List<AwarenessActivityModel> readJSON() throws IOException {
         Gson g = new Gson();
-        List<AwarenessActivity> activities = null;
+        List<AwarenessActivityModel> activities = null;
         //Reader r = new FileReader(new File("res/configuration.json")); will throw FileNotFoundException
         InputStream is = context.getResources().openRawResource(context.getResources().getIdentifier("configuration",
                 "raw", context.getPackageName()));
@@ -61,8 +56,8 @@ public class JSONParser {
         fences.add(headphoneFence);*/
     }
     //TODO: Criar parser externo
-    private ArrayList<AwarenessActivity> parseActivitiesList(JsonReader jsonReader) throws IOException {
-        ArrayList<AwarenessActivity> activitiesList = new ArrayList<AwarenessActivity>();
+    private ArrayList<AwarenessActivityModel> parseActivitiesList(JsonReader jsonReader) throws IOException {
+        ArrayList<AwarenessActivityModel> activitiesList = new ArrayList<AwarenessActivityModel>();
         jsonReader.beginArray();
         while (jsonReader.hasNext()){
             activitiesList.add(parseActivity(jsonReader));
@@ -72,7 +67,7 @@ public class JSONParser {
     }
 
 
-    private AwarenessActivity parseActivity(JsonReader jsonReader) throws IOException {
+    private AwarenessActivityModel parseActivity(JsonReader jsonReader) throws IOException {
         Log.d(TAG, "parseActivity: parsing");
         jsonReader.beginObject();
         jsonReader.nextName(); // "name" tag
@@ -89,7 +84,7 @@ public class JSONParser {
         jsonReader.endArray(); // ]
         jsonReader.endObject();
 
-        AwarenessActivity act = new AwarenessActivity(activityPacket + "." + activityName,fence);
+        AwarenessActivityModel act = new AwarenessActivityModel(activityPacket + "." + activityName,fence);
         return act;
 
     }

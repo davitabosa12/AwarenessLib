@@ -7,13 +7,21 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.SnapshotClient;
+import com.google.android.gms.awareness.snapshot.DetectedActivityResponse;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
@@ -21,21 +29,20 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
-import awarenesshelper.AndFence;
 import awarenesshelper.Configurator;
-import awarenesshelper.DAMethod;
-import awarenesshelper.DetectedActivityFence;
-import awarenesshelper.DetectedActivityParameter;
+
 import awarenesshelper.FenceManager;
-import awarenesshelper.HeadphoneFence;
-import awarenesshelper.HeadphoneMethod;
+
+import awarenesshelper.SnapshotType;
+import awarenesshelper.activity.AwarenessAppCompatActivity;
 import br.ufc.great.awarenesslib.ActivityRegisterContract.ActivityRegisterEntry;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AwarenessAppCompatActivity implements View.OnClickListener {
 
     ArrayList<Pair<String, DateTime>> data;
     LinearLayout ll;
     BroadcastReceiver receiver;
+    Button btn;
 
 
     @Override
@@ -43,11 +50,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        Configurator.init(this);
         data = new ArrayList<>();
         JodaTimeAndroid.init(this);
         ll = findViewById(R.id.linearScroll);
+        btn = findViewById(R.id.btn_probability);
+        btn.setOnClickListener(this);
 
+        setSnapshots(SnapshotType.PLACES, SnapshotType.TIME_INTERVAL);
         updateData();
 
 
@@ -101,6 +110,12 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(pair.first + "---->>" + pair.second.toString());
             ll.addView(textView);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        String  place = getMostProbablePlace().toString();
+        Toast.makeText(this, "Voce esta em " + place, Toast.LENGTH_SHORT).show();
 
     }
 }
