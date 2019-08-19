@@ -1,0 +1,44 @@
+{
+  "activities": [
+    {
+      "name": "Main2Activity",
+      "packet": "br.ufc.great.contextplayer",
+      "fences": [
+        {
+          "fenceType": "1",
+          "fenceName": "recommend_player_start",
+          "fenceAction": "br.ufc.great.contextplayer.PlayerStartAction",
+          "fenceMethod": "Headphone.PLUGGING_IN",
+          "params": []
+        },
+        {
+          "fenceType": "6",
+          "fenceName": "recommend_training",
+          "fenceAction": "br.ufc.great.contextplayer.RecommendTrainingAction",
+          "fenceMethod": "Aggregate.AND",
+          "params": {
+            "and": [
+              {
+                "fenceType": "1",
+                "fenceName": "",
+                "fenceAction": "",
+                "fenceMethod": "Headphone.PLUGGING_IN",
+                "params": []
+              },
+              {
+                "fenceType": "2",
+                "fenceName": "",
+                "fenceAction": "",
+                "fenceMethod": "ActivityDetection.DURING",
+                "params": {
+                  "activityTypes": [0,2,3,5]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "snapshots": []
+    }
+  ]
+}
