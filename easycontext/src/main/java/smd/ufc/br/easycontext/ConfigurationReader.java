@@ -1,6 +1,7 @@
 package smd.ufc.br.easycontext;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -31,24 +32,30 @@ import smd.ufc.br.easycontext.fence.type.FenceType;
  * Created by davitabosa on 08/08/2018.
  */
 //TODO: Refactor this
-    /*
-public class JSONParser {
-    private static final String TAG = "JSONParser";
+public class ConfigurationReader {
+    private static final String TAG = "ConfigurationReader";
+    private static final String CONFIGURATION_NAME = "configuration";
 
     Context context;
 
-    public JSONParser(Context context) {
+    public ConfigurationReader(Context context) {
 
         this.context = context;
 
     }
 
-    public List<AwarenessActivity> readJSON() throws IOException {
+    public List<Fence> readJSON() throws IOException {
         Gson g = new Gson();
-        List<AwarenessActivity> activities = null;
-        //Reader r = new FileReader(new File("res/configuration.json")); will throw FileNotFoundException
-        InputStream is = context.getResources().openRawResource(context.getResources().getIdentifier("configuration",
-                "raw", context.getPackageName()));
+        InputStream is;
+        try{
+            is = context.getResources().openRawResource(context.getResources().getIdentifier(CONFIGURATION_NAME,
+                    "raw", context.getPackageName()));
+        } catch (Resources.NotFoundException ex){
+            //there are no json with name 'configuration' in res/raw.
+            Log.e(TAG, "There are no configurations in res/raw. Please make sure you have a valid JSON file named '" + CONFIGURATION_NAME + "' in res/raw.", ex);
+            return null;
+        }
+
         Reader r = new InputStreamReader(is);
 
 
@@ -56,6 +63,11 @@ public class JSONParser {
 
         jsonReader.beginObject(); //espera um inicio de objeto
         String peekTagName = jsonReader.nextName();
+        if(peekTagName.equals("version")){
+            String version = jsonReader.nextString();
+            //todo Set up a version of ConfigurationReader here
+            Log.d(TAG, "readJSON: Using version " + version);
+        }
         if(peekTagName.equals("activities")){
             //jsonReader.nextName();
             activities = parseActivitiesList(jsonReader);

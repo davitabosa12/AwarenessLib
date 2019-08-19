@@ -1,4 +1,4 @@
-package smd.ufc.br.easycontext;
+/*package smd.ufc.br.easycontext;
 
 import android.app.Activity;
 import android.app.Service;
@@ -17,10 +17,9 @@ import java.util.concurrent.Future;
 import smd.ufc.br.easycontext.fence.Fence;
 import smd.ufc.br.easycontext.fence.FenceAction;
 import smd.ufc.br.easycontext.fence.FenceManager;
-/*
+
 public class Configurator {
     private Activity activity;
-    private Service service;
     private static Context context;
     private static Configurator instance;
     private static String activityName;
@@ -38,7 +37,7 @@ public class Configurator {
         Log.d("AwarenessLib", activityName);
 
         try {
-            activities = new JSONParser(context).readJSON();
+            activities = new ConfigurationReader(context).readJSON();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -50,11 +49,11 @@ public class Configurator {
         context = service.getApplicationContext();
         fenceManager = FenceManager.getInstance(context);
         activityName = service.getClass().getName();
-        JSONParser parser = new JSONParser(context);
+        ConfigurationReader parser = new ConfigurationReader(context);
         Log.d("AwarenessLib", activityName);
 
         try {
-            activities = new JSONParser(context).readJSON();
+            activities = new ConfigurationReader(context).readJSON();
         } catch (IOException e) {
             Log.e("AwarenessLib", "Error reading JSON");
             e.printStackTrace();
@@ -65,10 +64,7 @@ public class Configurator {
      * Getter for the Activity which this Configurator is bound to
      *
      * @return null if it's bound by a service, otherwise the bound activity
-     *//*
-    public Activity getActivity() {
-        return activity;
-    }
+     */
 
     /**
      * Getter for the Service which this Configurator is bound to

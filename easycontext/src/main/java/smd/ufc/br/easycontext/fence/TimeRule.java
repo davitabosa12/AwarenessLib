@@ -15,6 +15,19 @@ import smd.ufc.br.easycontext.fence.parameter.TimeParameter;
 import smd.ufc.br.easycontext.fence.type.FenceType;
 
 public class TimeRule implements Rule{
+    public static final String AROUND_TIME_INSTANT =  "TIME_INTERVAL.AROUND_TIME_INSTANT";
+    public static final String IN_DAILY_INTERVAL =  "TIME_INTERVAL.IN_DAILY_INTERVAL";
+    public static final String IN_INTERVAL =  "TIME_INTERVAL.IN_INTERVAL";
+    public static final String IN_INTERVAL_OF_DAY =  "TIME_INTERVAL.IN_INTERVAL_OF_DAY";
+    public static final String IN_TIME_INTERVAL =  "TIME_INTERVAL.IN_TIME_INTERVAL";
+    public static final String MORNING = "TIME_INTERVAL.MORNING" ;
+    public static final String AFTERNOON = "TIME_INTERVAL.AFTERNOON";
+    public static final String EVENING = "TIME_INTERVAL.EVENING";
+    public static final String NIGHT = "TIME_INTERVAL.NIGHT";
+    public static final String WEEKDAY = "TIME_INTERVAL.WEEKDAY";
+    public static final String WEEKEND = "TIME_INTERVAL.WEEKEND";
+    public static final String HOLIDAY = "TIME_INTERVAL.HOLIDAY";
+
     private TimeMethod method;
 
     private int timeInstant;
