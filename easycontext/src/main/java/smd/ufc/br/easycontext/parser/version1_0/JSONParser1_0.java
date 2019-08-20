@@ -67,15 +67,19 @@ public class JSONParser1_0 implements JSONParser {
         } else if(ruleName.equals("Activity")){
             //parse activity rule...
         } else if(ruleName.equals("TimeInterval")){
+
             //parse TimeInterval rule...
+            TimeIntervalParser parser = new TimeIntervalParser();
+            rule = parser.parseTimeIntervalRule(jsonReader);
         } else if(ruleName.equals("Aggregate")){
             //parse aggregate rule...
         } else {
             //unknown rule
             Log.e(TAG, "parseRule: unknown rule type '" + ruleName + "'.");
-            return null;
+            rule = null;
         }
-        return null;
+        jsonReader.endObject();
+        return rule;
 
     }
 }
