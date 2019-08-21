@@ -20,8 +20,6 @@ public class GeneralReceiver extends BroadcastReceiver {
         String fenceName = state.getFenceKey();
         Log.d(TAG, "onReceive: received update from fence \"" + fenceName +  "\"");
 
-        //TODO: Redirect behavior to registered Actions
-
         String className = intent.getStringExtra("actionName");
         Bundle extras = intent.getBundleExtra("user_provided");
         try {

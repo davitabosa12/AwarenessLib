@@ -64,37 +64,7 @@ public class FenceManager implements OnCompleteListener<FenceQueryResponse> {
         return true;
     }
 
-    @Deprecated
-    public Task registerFence(Fence fence){
-        //check if fence is already registered.
-        if(isFenceRegistered(fence)){
-
-            Log.d("AwarenessLib", "Fence " + fence.getName() + "is already registered.");
-            return null;
-        }
-        else{
-            final FenceAction theFenceAction = fence.getAction();
-            BroadcastReceiver myReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    theFenceAction.doOperation(context, FenceState.extract(intent), intent.getBundleExtra("user_provided"));
-                }
-            };
-
-            String filter = fence.getName();
-            Intent i = new Intent(filter);
-            PendingIntent pi = PendingIntent.getBroadcast(context, new Random().nextInt(),i,PendingIntent.FLAG_CANCEL_CURRENT);
-            context.registerReceiver(myReceiver,new IntentFilter(filter));
-
-            final String fenceName = fence.getName();
-
-            Task t = client.updateFences(new FenceUpdateRequest.Builder().addFence(fence.getName(),fence.getRule().getAwarenessFence(),pi).build());
-            return t;
-        }
-
-    }
-
-    public Task registerFence2(Fence fence, @Nullable Bundle extras){
+    public Task registerFence(Fence fence, @Nullable Bundle extras){
         Intent i = new Intent(context, GeneralReceiver.class);
         String actionName = fence.getAction().getClass().getName();
         i.putExtra("actionName", actionName);

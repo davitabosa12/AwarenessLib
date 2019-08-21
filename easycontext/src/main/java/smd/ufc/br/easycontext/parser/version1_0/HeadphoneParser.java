@@ -7,9 +7,7 @@ import com.google.gson.stream.JsonReader;
 
 import java.io.IOException;
 
-import smd.ufc.br.easycontext.HeadphoneMethod;
 import smd.ufc.br.easycontext.fence.HeadphoneRule;
-import smd.ufc.br.easycontext.fence.Rule;
 
 public class HeadphoneParser {
 

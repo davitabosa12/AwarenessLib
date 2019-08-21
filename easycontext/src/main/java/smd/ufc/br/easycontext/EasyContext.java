@@ -1,5 +1,68 @@
 package smd.ufc.br.easycontext;
 
-public class EasyContext {
+import android.content.Context;
 
+import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import smd.ufc.br.easycontext.fence.Fence;
+import smd.ufc.br.easycontext.fence.FenceManager;
+
+public class EasyContext {
+    private static EasyContext instance;
+    private FenceManager fenceManager;
+    private Map<String, Fence> fenceList = new HashMap();
+    private EasyContext(Context context){
+        try {
+            Configuration configuration;
+            configuration = Configuration.readJSON(context);
+            for(Fence fence : configuration.getFenceList()){
+                fenceList.put(fence.getName(), fence);
+            }
+            fenceManager = FenceManager.getInstance(context);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static EasyContext init(Context context){
+        if (instance == null) {
+            instance = new EasyContext(context);
+        }
+        return instance;
+    }
+
+    public boolean watch(String fenceName){
+        Fence fence = fenceList.get(fenceName);
+        if (fence != null) {
+            fenceManager.registerFence(fence, null);
+            return true;
+        }
+        return false;
+    }
+
+    public void watchAll(){
+        Set<String> keys = fenceList.keySet();
+        for (String fenceName : keys){
+            watch(fenceName);
+        }
+    }
+    public void unwatchAll(){
+        Set<String> keys = fenceList.keySet();
+        for (String fenceName : keys){
+            unwatch(fenceName);
+        }
+    }
+
+    public void unwatch(String fenceName){
+        Fence fence = fenceList.get(fenceName);
+        if (fence != null) {
+            fenceManager.unregisterFence(fence);
+        }
+    }
 }
