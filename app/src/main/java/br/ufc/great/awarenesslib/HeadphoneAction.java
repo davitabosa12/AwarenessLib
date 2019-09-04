@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -18,19 +19,19 @@ import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.joda.time.DateTime;
 
-import awarenesshelper.FenceAction;
+import smd.ufc.br.easycontext.fence.FenceAction;
 
 /**
  * Created by davitabosa on 20/08/2018.
  */
 
-public class HeadphoneAction implements FenceAction {
+public class HeadphoneAction extends FenceAction {
     Context context;
 
     private Notification notification;
     private static final String TAG = "HeadphoneAction";
     @Override
-    public void doOperation(Context context, FenceState state) {
+    public void doOperation(Context context, FenceState state, Bundle data) {
         this.context = context;
         notification = new NotificationCompat.Builder(context, "awarenesslib")
                 .setContentTitle("Plugado")

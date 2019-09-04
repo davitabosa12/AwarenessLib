@@ -15,7 +15,7 @@ import smd.ufc.br.easycontext.fence.FenceAction;
  * Created by davitabosa on 20/08/2018.
  */
 
-public class VibrateAction implements FenceAction {
+public class VibrateAction extends FenceAction {
     long millis = 500;
 
     public VibrateAction(long millis) {

@@ -11,7 +11,7 @@ import com.google.android.gms.awareness.fence.FenceState;
 
 import smd.ufc.br.easycontext.fence.FenceAction;
 
-public class FlashlightAction implements FenceAction {
+public class FlashlightAction extends FenceAction {
     private static final String TAG = "FlashlightAction";
     @Override
     public void doOperation(Context context, FenceState state, Bundle data) {

@@ -15,7 +15,7 @@ import com.google.android.gms.awareness.fence.FenceState;
 import smd.ufc.br.easycontext.R;
 import smd.ufc.br.easycontext.fence.FenceAction;
 
-public class NotificationAction implements FenceAction {
+public class NotificationAction extends FenceAction {
     String title, channel, text;
     int importance;
 
@@ -70,7 +70,7 @@ public class NotificationAction implements FenceAction {
     @Override
     public void doOperation(Context context, FenceState state, Bundle data) {
         if(state.getCurrentState() == FenceState.TRUE){
-            Notification notification = new NotificationCompat.Builder(context, channel)
+            Notification notification = new NotificationCompat.Builder(context)
                     .setContentTitle(title)
                     .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                     .setContentText(text)
@@ -79,7 +79,7 @@ public class NotificationAction implements FenceAction {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 nm.createNotificationChannel(new NotificationChannel(channel, channel, importance));
             }
-            NotificationManagerCompat.from(context).notify((int) SystemClock.uptimeMillis(),notification);
+            NotificationManagerCompat.from(context).notify(channel, (int) SystemClock.uptimeMillis(),notification);
         }
     }
 }

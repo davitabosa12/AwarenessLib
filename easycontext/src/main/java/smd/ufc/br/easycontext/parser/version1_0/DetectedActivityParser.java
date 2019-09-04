@@ -23,30 +23,31 @@ public class DetectedActivityParser {
         List<Integer> activityTypes = new ArrayList<>();
         jsonReader.beginArray();
         while(jsonReader.hasNext()){
-            if(jsonReader.nextString().equals(DAMethods.IN_VEHICLE)){
+            String daMethod = jsonReader.nextString();
+            if(daMethod.equals(DAMethods.IN_VEHICLE)){
                 activityTypes.add(DetectedActivityFence.IN_VEHICLE);
-            } else if(jsonReader.nextString().equals(DAMethods.ON_BICYCLE)){
+            } else if(daMethod.equals(DAMethods.ON_BICYCLE)){
                 activityTypes.add(DetectedActivityFence.ON_BICYCLE);
-            } else if(jsonReader.nextString().equals(DAMethods.ON_FOOT)){
+            } else if(daMethod.equals(DAMethods.ON_FOOT)){
                 activityTypes.add(DetectedActivityFence.ON_FOOT);
-            } else if(jsonReader.nextString().equals(DAMethods.RUNNING)){
+            } else if(daMethod.equals(DAMethods.RUNNING)){
                 activityTypes.add(DetectedActivityFence.RUNNING);
-            } else if(jsonReader.nextString().equals(DAMethods.STILL)){
+            } else if(daMethod.equals(DAMethods.STILL)){
                 activityTypes.add(DetectedActivityFence.STILL);
-            } else if(jsonReader.nextString().equals(DAMethods.TILTING)){
+            } else if(daMethod.equals(DAMethods.TILTING)){
                 activityTypes.add(DetectedActivityFence.STILL);
-            } else if(jsonReader.nextString().equals(DAMethods.UNKNOWN)){
+            } else if(daMethod.equals(DAMethods.UNKNOWN)){
                 activityTypes.add(DetectedActivityFence.UNKNOWN);
-            } else if(jsonReader.nextString().equals(DAMethods.WALKING)){
+            } else if(daMethod.equals(DAMethods.WALKING)){
                 activityTypes.add(DetectedActivityFence.WALKING);
             }
         }
         jsonReader.endArray();
-        if(jsonReader.nextString().equals(DAMethods.STARTING)){
+        if(method.equals(DAMethods.STARTING)){
             rule = DetectedActivityRule.during(activityTypes);
-        } else if(jsonReader.nextString().equals(DAMethods.STOPPING)){
+        } else if(method.equals(DAMethods.STOPPING)){
             rule = DetectedActivityRule.starting(activityTypes);
-        } else if(jsonReader.nextString().equals(DAMethods.DURING)){
+        } else if(method.equals(DAMethods.DURING)){
             rule = DetectedActivityRule.stopping(activityTypes);
         } else{
             Log.e(TAG, "parseDetectedActivityRule: ERROR - UNKNOWN METHOD");

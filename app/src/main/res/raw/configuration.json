@@ -1,48 +1,104 @@
 {
-    "activities": [
+  "version": "1.0",
+  "fences": [
+    {
+      "name": "headphoneRule",
+      "rule": {
+        "ruleName": "Headphone",
+        "method": "HEADPHONE.PLUGGING_IN"
+      },
+      "action": [
         {
-            "name": "MainActivity",
-            "packet": "br.ufc.great.awarenesslib",
-            "fences": [
-                {
-                    "fenceType": "1",
-                    "fenceName": "headphone_fence",
-                    "fenceAction": "br.ufc.great.awarenesslib.HeadphoneAction",
-                    "fenceMethod": "Headphone.DURING",
-                    "params": {
-                        "headphoneState": "PLUGGED_IN"
-                    }
-                },
-                {
-                    "fenceType": "2",
-                    "fenceName": "stopping_fence",
-                    "fenceAction": "br.ufc.great.awarenesslib.StoppedMovingAction",
-                    "fenceMethod": "ActivityDetection.STOPPING",
-                    "params": {
-                        "activityTypes": [
-                            "ON_BICYCLE",
-                            "ON_FOOT",
-                            "RUNNING",
-                            "WALKING"
-                        ]
-                    }
-                },
-                {
-                    "fenceType": "2",
-                    "fenceName": "starting_fence",
-                    "fenceAction": "br.ufc.great.awarenesslib.StartedMovingAction",
-                    "fenceMethod": "ActivityDetection.STARTING",
-                    "params": {
-                        "activityTypes": [
-                            "ON_BICYCLE",
-                            "ON_FOOT",
-                            "RUNNING",
-                            "WALKING"
-                        ]
-                    }
-                }
-            ],
-            "snapshots": []
+          "actionName": "VibrateAction",
+          "ms": 1225
         }
-    ]
+      ]
+    },
+    {
+      "name": "all",
+      "rule": {
+        "ruleName": "Aggregate",
+        "method": "AGGREGATE.OR",
+        "rules": [
+          {
+            "ruleName": "Aggregate",
+            "method": "AGGREGATE.OR",
+            "rules": [
+              {
+                "ruleName": "Aggregate",
+                "method": "AGGREGATE.OR",
+                "rules": [
+                  {
+                    "ruleName": "Aggregate",
+                    "method": "AGGREGATE.OR",
+                    "rules": [
+                      {
+                        "ruleName": "Headphone",
+                        "method": "HEADPHONE.PLUGGING_IN"
+                      },
+                      {
+                        "ruleName": "Location",
+                        "method": "LOCATION.ENTERING",
+                        "latitude": -3.746561874382303,
+                        "longitude": -38.578126430511475,
+                        "radius": 100
+                      }
+                    ]
+                  },
+                  {
+                    "ruleName": "TimeInterval",
+                    "method": "TIME_INTERVAL.AROUND_TIME_INSTANT",
+                    "timeInstant": "TIME_INSTANT_SUNRISE",
+                    "startOffsetMillis": -43200000,
+                    "stopOffsetMillis": 50400000
+                  }
+                ]
+              },
+              {
+                "ruleName": "DetectedActivity",
+                "method": "DA.STARTING",
+                "activityTypes": [
+                  "DA.TILTING",
+                  "DA.RUNNING",
+                  "DA.ON_BICYCLE",
+                  "DA.STILL",
+                  "DA.WALKING"
+                ]
+              }
+            ]
+          },
+          {
+            "ruleName": "Aggregate",
+            "method": "AGGREGATE.AND",
+            "rules": [
+              {
+                "ruleName": "Location",
+                "method": "LOCATION.IN",
+                "latitude": -3.746561874382303,
+                "longitude": -38.578126430511475,
+                "radius": 100,
+                "dwellTimeMillis": "1050"
+              },
+              {
+                "ruleName": "TimeInterval",
+                "method": "TIME_INTERVAL.IN_DAILY_INTERVAL",
+                "timeZone": "Device",
+                "startTimeOfDayMillis": 39300000,
+                "stopTimeOfDayMillis": 64800000
+              }
+            ]
+          }
+        ]
+      },
+      "action": [
+        {
+          "actionName": "NotificationAction",
+          "title": "asd",
+          "channel": "asd",
+          "text": "asd",
+          "importance": "Notification.DEFAULT"
+        }
+      ]
+    }
+  ]
 }

@@ -1,10 +1,5 @@
 package smd.ufc.br.easycontext.persistance.entities;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.TypeConverters;
-
 import com.google.android.gms.awareness.fence.TimeFence;
 import com.google.android.gms.awareness.state.TimeIntervals;
 
@@ -14,43 +9,29 @@ import java.util.Arrays;
 import smd.ufc.br.easycontext.ContextDefinition;
 import smd.ufc.br.easycontext.CurrentContext;
 import smd.ufc.br.easycontext.math.FloatStatistics;
-import smd.ufc.br.easycontext.persistance.typeconverters.IntegerArrayConverter;
 
-@Entity
 public class TimeIntervalDefinition implements TimeIntervals, ContextDefinition  {
 
 
     //constants
-    @Ignore
     public static final int TIME_INTERVAL_WEEKDAY = 1;
-    @Ignore
     public static final int TIME_INTERVAL_WEEKEND = 2;
-    @Ignore
     public static final int TIME_INTERVAL_HOLIDAY = 3;
-    @Ignore
     public static final int TIME_INTERVAL_MORNING = 4;
-    @Ignore
     public static final int TIME_INTERVAL_AFTERNOON = 5;
-    @Ignore
     public static final int TIME_INTERVAL_EVENING = 6;
-    @Ignore
     public static final int TIME_INTERVAL_NIGHT = 7;
-    @Ignore
     public static final int TIME_INTERVAL_ANY = 8;
 
-    @Ignore
     private boolean isDirty = false;
 
 
 
-    @PrimaryKey(autoGenerate = true)
     private int uid;
 
-    @TypeConverters(IntegerArrayConverter.class)
     private int[] timeIntervals;
 
 
-    @Ignore
     public TimeIntervalDefinition(int[] timeIntervals) {
         this.timeIntervals = timeIntervals;
     }

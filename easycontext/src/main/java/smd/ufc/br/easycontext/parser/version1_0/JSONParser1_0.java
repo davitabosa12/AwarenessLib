@@ -15,7 +15,6 @@ import smd.ufc.br.easycontext.fence.AggregateRule;
 import smd.ufc.br.easycontext.fence.Fence;
 import smd.ufc.br.easycontext.fence.FenceAction;
 import smd.ufc.br.easycontext.fence.Rule;
-import smd.ufc.br.easycontext.fence.action.MultipleAction;
 import smd.ufc.br.easycontext.fence.action.NotificationAction;
 import smd.ufc.br.easycontext.fence.action.VibrateAction;
 import smd.ufc.br.easycontext.parser.JSONParser;
@@ -62,13 +61,13 @@ public class JSONParser1_0 implements JSONParser {
 
     private FenceAction parseActions(JsonReader jsonReader) throws IOException {
         //action is a JSON array.
-        MultipleAction actions = new MultipleAction();
+        List<FenceAction> actions = new ArrayList<>();
         jsonReader.beginArray();
         while (jsonReader.hasNext()){
             actions.add(parseAction(jsonReader));
         }
         jsonReader.endArray();
-        return actions;
+        return actions.get(0);
     }
 
     private FenceAction parseAction(JsonReader jsonReader) throws IOException {
@@ -161,7 +160,7 @@ public class JSONParser1_0 implements JSONParser {
             //parse location rule...
             LocationParser parser = new LocationParser();
             rule = parser.parseLocationRule(jsonReader);
-        } else if(ruleName.equals("Activity")){
+        } else if(ruleName.equals("DetectedActivity")){
             //parse activity rule...
             DetectedActivityParser parser = new DetectedActivityParser();
             rule = parser.parseDetectedActivityRule(jsonReader);
@@ -171,6 +170,7 @@ public class JSONParser1_0 implements JSONParser {
             rule = parser.parseTimeIntervalRule(jsonReader);
         } else if(ruleName.equals("Aggregate")){
             //parse aggregate rule...
+            rule = parseAggregate(jsonReader);
 
         } else {
             //unknown rule
@@ -184,10 +184,12 @@ public class JSONParser1_0 implements JSONParser {
         jsonReader.nextName(); //property 'method'
         String method = jsonReader.nextString();
         List<Rule> rules = new ArrayList<>();
+        jsonReader.nextName(); //property 'rules'
         jsonReader.beginArray(); // rules array
         while (jsonReader.hasNext()){
             rules.add(parseRule(jsonReader));
         }
+        jsonReader.endArray();
         if (method.equals(AggregateMethods.AND)){
             return AggregateRule.and(rules);
         } else if(method.equals(AggregateMethods.OR)){

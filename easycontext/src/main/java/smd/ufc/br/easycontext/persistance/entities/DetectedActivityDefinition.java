@@ -1,12 +1,6 @@
 package smd.ufc.br.easycontext.persistance.entities;
-
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.TypeConverters;
-
 import com.google.android.gms.location.DetectedActivity;
+import com.google.gson.Gson;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,43 +8,38 @@ import java.util.List;
 import smd.ufc.br.easycontext.ContextDefinition;
 import smd.ufc.br.easycontext.CurrentContext;
 import smd.ufc.br.easycontext.math.FloatStatistics;
-import smd.ufc.br.easycontext.persistance.typeconverters.IntegerArrayConverter;
 
-@Entity
 public class DetectedActivityDefinition implements ContextDefinition {
 
     //constants
-    @Ignore
+    
     public static final int IN_VEHICLE = 0;
-    @Ignore
+    
     public static final int ON_BICYCLE = 1;
-    @Ignore
+    
     public static final int ON_FOOT = 2;
-    @Ignore
+    
     public static final int STILL = 3;
-    @Ignore
+    
     public static final int UNKNOWN = 4;
-    @Ignore
+    
     public static final int TILTING = 5;
-    @Ignore
+    
     public static final int WALKING = 7;
-    @Ignore
+    
     public static final int RUNNING = 8;
-    @Ignore
+    
     public static final int ANY = 9;
 
 
 
-    @Ignore
+    
     private boolean isDirty = false;
 
 
 
-    @PrimaryKey(autoGenerate = true)
     private int uid;
 
-    @ColumnInfo
-    @TypeConverters(IntegerArrayConverter.class)
     private int[] activityTypes;
 
 
@@ -126,5 +115,16 @@ public class DetectedActivityDefinition implements ContextDefinition {
         list[list.length - 1] = i;
         activityTypes = list;
 
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+
+        return "DetectedActivityDefinition{" +
+                "isDirty=" + isDirty +
+                ", uid=" + uid +
+                ", activityTypes=" + Arrays.toString(activityTypes) +
+                '}';
     }
 }

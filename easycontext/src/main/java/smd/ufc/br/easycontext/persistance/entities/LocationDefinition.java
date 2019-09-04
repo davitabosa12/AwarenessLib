@@ -1,9 +1,5 @@
 package smd.ufc.br.easycontext.persistance.entities;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
 import android.location.Location;
 import android.support.annotation.Nullable;
 
@@ -12,22 +8,17 @@ import com.google.android.gms.awareness.snapshot.LocationResponse;
 import smd.ufc.br.easycontext.ContextDefinition;
 import smd.ufc.br.easycontext.CurrentContext;
 
-@Entity
+
 public class LocationDefinition implements ContextDefinition {
 
-    @Ignore
     private Location location;
 
-    @PrimaryKey(autoGenerate = true)
     private int uid;
 
-    @ColumnInfo
     private float latitude;
 
-    @ColumnInfo
     private float longitude;
 
-    @ColumnInfo
     private float maxDistance;
 
 

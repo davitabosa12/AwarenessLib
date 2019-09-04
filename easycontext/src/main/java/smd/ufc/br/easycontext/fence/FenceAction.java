@@ -7,8 +7,12 @@ import com.google.android.gms.awareness.fence.FenceState;
 
 import java.io.Serializable;
 
-public interface FenceAction extends Serializable {
+public abstract class FenceAction implements Serializable {
 
-	public void doOperation(Context context, FenceState state, Bundle data);
+	public abstract void doOperation(Context context, FenceState state, Bundle data);
 
+	@Override
+	public String toString() {
+		return this.getClass().getCanonicalName();
+	}
 }

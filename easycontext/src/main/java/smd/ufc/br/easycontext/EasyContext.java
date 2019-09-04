@@ -65,4 +65,12 @@ public class EasyContext {
             fenceManager.unregisterFence(fence);
         }
     }
+
+    public FenceManager getFenceManager() {
+        return fenceManager;
+    }
+
+    public Map<String, Fence> getFenceList() {
+        return fenceList;
+    }
 }
