@@ -1,7 +1,10 @@
 package smd.ufc.br.easycontext;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
@@ -13,6 +16,7 @@ import smd.ufc.br.easycontext.fence.Fence;
 import smd.ufc.br.easycontext.fence.FenceManager;
 
 public class EasyContext {
+    private static String TAG = "EasyContext";
     private static EasyContext instance;
     private FenceManager fenceManager;
     private Map<String, Fence> fenceList = new HashMap();
@@ -37,10 +41,15 @@ public class EasyContext {
         return instance;
     }
 
-    public boolean watch(String fenceName){
+    public boolean watch(final String fenceName){
         Fence fence = fenceList.get(fenceName);
         if (fence != null) {
-            fenceManager.registerFence(fence, null);
+            fenceManager.registerFence(fence, null).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e(TAG, "onFailure: could not register fence " + fenceName, e);
+                }
+            });
             return true;
         }
         return false;

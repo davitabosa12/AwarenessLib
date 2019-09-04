@@ -5,7 +5,7 @@
       "name": "headphoneRule",
       "rule": {
         "ruleName": "Headphone",
-        "method": "HEADPHONE.PLUGGING_IN"
+        "method": "HEADPHONE.UNPLUGGING"
       },
       "action": [
         {
